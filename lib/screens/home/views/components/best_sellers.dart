@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shop/constants.dart';
 import 'package:shop/route/route_constants.dart';
 
 class ProductModel {
@@ -217,7 +218,9 @@ class _BestSellersState extends State<BestSellers> {
                       if (!_isLoading)
                         TextButton(
                           onPressed: _loadMore,
-                          child: const Text("عرض المزيد"),
+                          child: const Text("عرض المزيد",
+                              style: TextStyle(
+                                color:primaryColor)),
                         ),
                       if (_isLoading)
                         const Padding(
@@ -298,7 +301,7 @@ class _BestSellersState extends State<BestSellers> {
             child: Container(
               height: 80,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 17, 52, 92),
+                color: const Color(0xFF0F1A40), // Use the correct integer format
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
               ),

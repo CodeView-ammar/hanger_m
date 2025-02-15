@@ -238,7 +238,7 @@ class _EntryPointState extends State<EntryPoint> {
         padding: const EdgeInsets.only(top: defaultPadding / 2),
         color: Theme.of(context).brightness == Brightness.light
             ? Colors.white
-            : const Color(0xFF101015),
+            : primaryColor,
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           onTap: (index) {
@@ -249,31 +249,31 @@ class _EntryPointState extends State<EntryPoint> {
             }
           },
           backgroundColor: Theme.of(context).brightness == Brightness.light
-              ? Colors.white
-              : const Color(0xFF101015),
+              ? primaryColor
+              : primaryColor,
           type: BottomNavigationBarType.fixed,
-          selectedFontSize: 12,
-          selectedItemColor: primaryColor,
-          unselectedItemColor: Colors.transparent,
+          selectedFontSize: 15,
+          selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
+          unselectedItemColor: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.3),
           items: [
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Shop.svg"),
-              activeIcon: svgIcon("assets/icons/Shop.svg", color: primaryColor),
+              icon: svgIcon("assets/icons/Shop.svg", color: const Color.fromARGB(255, 255, 255, 255)),
+              activeIcon: svgIcon("assets/icons/Shop.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               label: "الرئيسي",
             ),
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Category.svg"),
-              activeIcon: svgIcon("assets/icons/Category.svg", color: primaryColor),
+              icon: svgIcon("assets/icons/Category.svg",color: const Color.fromARGB(255, 255, 255, 255)),
+              activeIcon: svgIcon("assets/icons/Category.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               label: "الطلبات",
             ),
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Bookmark.svg"),
-              activeIcon: svgIcon("assets/icons/Bookmark.svg", color: primaryColor),
+              icon: svgIcon("assets/icons/Bookmark.svg",color: const Color.fromARGB(255, 255, 255, 255)),
+              activeIcon: svgIcon("assets/icons/Bookmark.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               label: "المحفوظات",
             ),
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Profile.svg"),
-              activeIcon: svgIcon("assets/icons/Profile.svg", color: primaryColor),
+              icon: svgIcon("assets/icons/Profile.svg",color: const Color.fromARGB(255, 255, 255, 255)),
+              activeIcon: svgIcon("assets/icons/Profile.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               label: "ملفي",
             ),
           ],

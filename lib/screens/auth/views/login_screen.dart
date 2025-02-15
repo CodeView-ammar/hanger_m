@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           "سياسة الخصوصية",
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.blue,
+                            color: primaryColor,
                             decoration: TextDecoration.underline,
                           ),
                         ),

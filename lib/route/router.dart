@@ -81,10 +81,10 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       // return MaterialPageRoute(
       //   builder: (context) => Otp(),
       // );
-    case signUpScreenRoute:
-      return MaterialPageRoute(
-        builder: (context) => const SignUpScreen(),
-      );
+    // case signUpScreenRoute:
+    //   return MaterialPageRoute(
+    //     builder: (context) => const SignUpScreen(),
+    //   );
     case instructionsScreenRoute:
       return MaterialPageRoute(
         builder: (context) => const InstructionsScreen(),

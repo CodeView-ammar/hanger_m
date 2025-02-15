@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:http/http.dart' as http;
+import 'package:shop/constants.dart';
 import 'package:shop/screens/checkout/views/review_order.dart';
 
 class CartScreen extends StatefulWidget {
@@ -252,20 +253,22 @@ double distance = 0.0; // متغير للمسافة
                         final item = cartItems[index];
                         
                         return Card(
+                          color: secondaryColor ,
                           margin: const EdgeInsets.symmetric(vertical: 8.0),
                           child: ListTile(
+                            textColor: Colors.white,
                             title: Text(utf8.decode(item['service_name'].codeUnits)),
                             subtitle: Text("سعر: \ر.س ${item['price']} × ${item['quantity']}"),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.remove),
+                                  icon: const Icon(Icons.remove , color: Colors.white,),
                                   onPressed: () => updateQuantity(index, -1),
                                 ),
                                 Text('${item['quantity']}'),
                                 IconButton(
-                                  icon: const Icon(Icons.add),
+                                  icon: const Icon(Icons.add, color: Colors.white,),
                                   onPressed: () => updateQuantity(index, 1),
                                 ),
                                 IconButton(
@@ -287,6 +290,9 @@ double distance = 0.0; // متغير للمسافة
             ),
             const SizedBox(height: 16.0),
             ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                  ),
                   onPressed: () {
                     // احصل على الـ laundryId من العناصر في السلة
                     final int laundryId = cartItems.isNotEmpty ? cartItems[0]['laundry'] : 0;
@@ -307,6 +313,7 @@ double distance = 0.0; // متغير للمسافة
                           return AlertDialog(
                             title: const Text('خطأ'),
                             content: const Text('لا يوجد مغسلة محددة.'),
+                            backgroundColor: primaryColor,
                             actions: <Widget>[
                               TextButton(
                                 child: const Text('موافق'),

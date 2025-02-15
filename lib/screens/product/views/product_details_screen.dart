@@ -299,6 +299,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       (context, index) {
                         final service = services[index];
                         return Card(
+                        color: secondaryColor,
                           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           child: ListTile(
                             leading: Image.network(
@@ -307,10 +308,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               height: 50,
                               fit: BoxFit.cover,
                             ),
-                            title: Text(service.name),
-                            subtitle: Text('السعر: \ر.س ${service.price.toStringAsFixed(2)}'),
+                            title: Text(service.name, style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255))),
+                            subtitle: Text('السعر: \ر.س ${service.price.toStringAsFixed(2)}', style: TextStyle(color: const Color.fromARGB(255, 255, 255, 255))),
                             trailing: IconButton(
-                              icon: Icon(Icons.add),
+                              icon: const Icon(Icons.add, color: Color.fromARGB(255, 255, 255, 255)),
                               onPressed: () {
                                 showCustomBottomSheet(context, service, 1); // يمكنك هنا تعديل الكمية
                               },

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shop/constants.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shop/screens/checkout/views/delegate_note.dart';
 import 'package:shop/screens/checkout/views/payment_method.dart';
@@ -84,7 +85,7 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
     return (widget.total + deliveryPrice);
   }
 
-  Future<void> fetchDefaultPaymentMethod() async {
+Future<void> fetchDefaultPaymentMethod() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userid');
 
@@ -93,35 +94,36 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({'user': userId}),
     );
-
-    print('Response Status Code: ${response.statusCode}'); // طباعة الحالة
-
+    print(response.statusCode);
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       setState(() {
-        // تأكد من تعيين defaultPaymentMethod بشكل صحيح
-        defaultPaymentMethod = responseData['payment_method'] ?? 'غير محدد';
-        // تحويل طريقة الدفع إلى القيمة التي سيقبلها الـ API
-        if (defaultPaymentMethod == "الدفع عند الاستلام") {
-          defaultPaymentMethod = "COD";
-        } else if (defaultPaymentMethod == "الدفع باستخدام البطاقة") {
-          defaultPaymentMethod = "CARD";
-        } else if (defaultPaymentMethod == "الدفع باستخدام STC") {
-          defaultPaymentMethod = "STC";
+        String payment = responseData['payment_method'] ?? 'COD'; // تعيين COD كقيمة افتراضية
+        switch (payment) {
+          case "الدفع عند الاستلام":
+            defaultPaymentMethod = "COD";
+            break;
+          case "الدفع باستخدام البطاقة":
+            defaultPaymentMethod = "CARD";
+            break;
+          case "الدفع باستخدام STC":
+            defaultPaymentMethod = "STC";
+            break;
+          default:
+            defaultPaymentMethod = "COD";
         }
         if (widget.isPaid) {
-          defaultPaymentMethod = "تم الدفع باستخدام البطاقة"; // تم الدفع باستخدام البطاقة
-        } else {
-          defaultPaymentMethod = "الدفع عند الاستلام"; // الدفع عند الاستلام
+          defaultPaymentMethod = "CARD"; // تأكيد الدفع إذا كان مدفوعًا مسبقًا
         }
       });
     } else {
-      print('Error: ${response.body}'); // طباعة الأخطاء
+      print('Error: ${response.body}');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('يجب تحديد طريقة الدفع')),
       );
     }
   }
+
 
   Future<void> submitOrder() async {
     final prefs = await SharedPreferences.getInstance();
@@ -134,28 +136,29 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
 
     // Update payment method
     if (defaultPaymentMethod == "الدفع عند الاستلام") defaultPaymentMethod = "COD";
-    if (defaultPaymentMethod == "الدفع باستخدام البطاقة") defaultPaymentMethod = "CARD";
+    if (defaultPaymentMethod == "تم الدفع باستخدام البطاقة") defaultPaymentMethod = "CARD";
     if (defaultPaymentMethod == "الدفع باستخدام STC") defaultPaymentMethod = "STC";
 
     try {
-      print(defaultPaymentMethod);
+
       final response = await http.post(
-        Uri.parse('${APIConfig.orderSubmitUrl}'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'laundryId': widget.laundryId,
-          'userId': userId,
-          'delegateNote': delegateNote,
-          'paymentMethod': defaultPaymentMethod,
-          "isPaid": widget.isPaid,
-        }),
-      );
+            Uri.parse('${APIConfig.orderSubmitUrl}'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'laundryId': widget.laundryId,
+              'userId': userId,
+              'delegateNote': delegateNote,
+              'paymentMethod': defaultPaymentMethod != null ? 'COD' : 'CARD', // Adjust as needed
+              'isPaid': widget.isPaid,
+            }),
+          );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
+              
               title: const Text('تم إرسال الطلب بنجاح!'),
               content: const Text('تم إرسال طلبك بنجاح إلى المغسلة.'),
               actions: <Widget>[
@@ -476,7 +479,7 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  // color: Colors.green[100],
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(0),   // الزاوية العليا اليسرى
                     bottomRight: Radius.circular(0),  // الزاوية العليا اليمنى
@@ -502,7 +505,7 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  // color: Colors.green[100],
                   borderRadius: BorderRadius.circular(0),
                 ),
                 child: Row(
@@ -523,7 +526,7 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  // color: Colors.green[100],
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(0),   // الزاوية العليا اليسرى
                     topRight: Radius.circular(0),  // الزاوية العليا اليمنى
@@ -558,6 +561,9 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                  ),
                   onPressed: submitOrder,
                   child: const Text('إرسال الطلب'),
                 ),

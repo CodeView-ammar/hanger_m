@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop/constants.dart';
 
 class DelegateNoteScreen extends StatelessWidget {
   const DelegateNoteScreen({Key? key}) : super(key: key);
@@ -24,13 +25,16 @@ class DelegateNoteScreen extends StatelessWidget {
             TextField(
               controller: noteController,
               maxLines: 5, // عدد الأسطر المسموح بها
-              decoration: InputDecoration(
+              decoration:const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'اكتب ملاحظتك هنا...',
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+            ),
               onPressed: () {
                 String note = noteController.text;
                 if (note.isNotEmpty) {
@@ -39,7 +43,7 @@ class DelegateNoteScreen extends StatelessWidget {
                 } else {
                   // إذا كانت الملاحظة فارغة، يمكن عرض رسالة خطأ
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('من فضلك أدخل ملاحظة')),
+                    const SnackBar(content: Text('من فضلك أدخل ملاحظة')),
                   );
                 }
               },

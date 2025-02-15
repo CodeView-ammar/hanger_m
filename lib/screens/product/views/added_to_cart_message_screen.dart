@@ -38,6 +38,7 @@ class AddedToCartMessageScreen extends StatelessWidget {
               ),
               const Spacer(flex: 2),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
                 onPressed: () {
                   // إغلاق شاشة AddedToCartMessageScreen و BottomSheet
                   Navigator.pop(context); // إغلاق الشاشة الحالية (AddedToCartMessageScreen)

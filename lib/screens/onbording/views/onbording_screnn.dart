@@ -101,10 +101,10 @@ class _OnBordingScreenState extends State<OnBordingScreen> {
                   onPressed: () {
                     _navigateBasedOnPhoneStatus();
                   },
-                  child: Text(
+                  child: const Text(
                     "تخطي",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyLarge!.color),
+                        color: primaryColor),
                   ),
                 ),
               ),

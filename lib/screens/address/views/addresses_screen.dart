@@ -8,6 +8,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shop/constants.dart';
 import 'package:shop/route/route_constants.dart';
 
 
@@ -342,9 +343,11 @@ Future<Position> _getCurrentLocation() async {
                       ),
                       SizedBox(height: 16),
                       ElevatedButton(
+                        
                         onPressed: _confirmAddress,
                         child: Text("تأكيد العنوان"),
                         style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
                           minimumSize: Size(double.infinity, 50),
                           padding: EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -360,8 +363,10 @@ Future<Position> _getCurrentLocation() async {
           alignment: Alignment.bottomLeft,
           child: FloatingActionButton(
             onPressed: _goToCurrentLocation,
-            child: Icon(Icons.my_location),
-            backgroundColor: const Color.fromARGB(255, 255, 219, 247),
+            backgroundColor:primaryColor,
+            child: Icon(
+              Icons.my_location,
+              color: Colors.white),
           ),
         ),
       ),

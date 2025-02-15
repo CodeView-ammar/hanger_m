@@ -127,14 +127,20 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
             padding: const EdgeInsets.symmetric(
                 horizontal: defaultPadding / 2, vertical: defaultPadding),
             child: Row(
+              
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const BackButton(),
-                Text(
-                  widget.serviceName,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ],
+                    Text(
+                      widget.serviceName,
+                      style: TextStyle(
+                        fontSize: 16, // حجم الخط
+                        fontWeight: FontWeight.bold, // سمك الخط
+                        color: Colors.black, // لون النص
+                      ),
+                    ),
+              const SizedBox(width: 18),
+                                ],
             ),
           ),
           Expanded(
@@ -183,6 +189,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                               leading: Transform.scale(
                                 scale: 1.5,  // تكبير الراديو بوتون
                                 child: Radio<String>(
+                                  focusColor: primaryColor,
                                   value: 'عادية',
                                   groupValue: _serviceType,
                                   onChanged: (String? value) {
@@ -198,6 +205,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                               leading: Transform.scale(
                                 scale: 1.5,  // تكبير الراديو بوتون
                                 child: Radio<String>(
+                                  focusColor: primaryColor,
                                   value: 'مستعجلة',
                                   groupValue: _serviceType,
                                   onChanged: (String? value) {
