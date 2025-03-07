@@ -21,7 +21,7 @@ class ServiceModel {
   final double price;
   final double urgentPrice;
   final String image;
-    
+
   ServiceModel({
     required this.id,
     required this.name,
@@ -38,9 +38,17 @@ class ServiceModel {
       description: json['description'],
       price: double.parse(json['price']),
       urgentPrice: double.parse(json['urgent_price']),
-      image: json['image'] ?? '', 
+      image: json['image'] ?? '',
     );
   }
+}
+
+// نموذج البيانات للتصنيف
+class CategoryModel {
+  final int id;
+  final String name;
+
+  CategoryModel({required this.id, required this.name});
 }
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -49,10 +57,10 @@ class ProductDetailsScreen extends StatefulWidget {
   final String name;
   final String image;
   final String address;
-  final double latitude; // لإضافة خط العرض
-  final double longitude; // لإضافة خط الطول
-  final double distance;  // تمرير المسافة
-  final String duration; // تمرير الوقت
+  final double latitude;
+  final double longitude;
+  final double distance;
+  final String duration;
 
   const ProductDetailsScreen({
     super.key,
@@ -61,8 +69,8 @@ class ProductDetailsScreen extends StatefulWidget {
     required this.name,
     required this.image,
     required this.address,
-    required this.latitude, // لإضافة خط العرض
-    required this.longitude, // لإضافة خط الطول
+    required this.latitude,
+    required this.longitude,
     required this.distance,
     required this.duration,
   });
@@ -72,70 +80,56 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
-  late Future<List<ServiceModel>> _services;
-  double totalPrice = 0.0;  // إضافة متغير لتخزين total_price
+  List<ServiceModel> _services = []; // تعديل هنا
+  double totalPrice = 0.0;
+
+  // قائمة التصنيفات
+  late Future<List<CategoryModel>> _categories;
+  int? selectedCategory;
 
   @override
   void initState() {
     super.initState();
-    _services = fetchServices(widget.id);
-    fetchTotalPrice(widget.id);  // جلب total_price من الـ API عند تحميل الصفحة
+    selectedCategory = 0; // تعيين التصنيف الافتراضي كـ "الكل"
+    _categories = fetchCategories(widget.id); // جلب التصنيفات
+    fetchServices(widget.id, selectedCategory); // جلب الخدمات مع التصنيف الافتراضي
+    fetchTotalPrice(widget.id);
   }
 
-  Future<void> fetchTotalPrice(serverid) async {
+  Future<void> fetchTotalPrice(int serverid) async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userid');  // جلب ID المستخدم من SharedPreferences
+    final userId = prefs.getString('userid');
     final response = await http.get(Uri.parse('${APIConfig.cartfilterEndpoint}?user=$userId&laundry=$serverid'));
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       if (mounted) {
         setState(() {
-          if (data['total_price'] == '') {
-            totalPrice = 0.0; // إذا كانت total_price تساوي 0، قم بتعيين totalPrice إلى 0.0
-          } else {
-            // إذا كانت القيمة من نوع int، قم بتحويلها إلى double
-            totalPrice = (data['total_price'] is int)
-                ? (data['total_price'] as int).toDouble()
-                : data['total_price']; // تحديث الـ total_price
-          }
+          totalPrice = (data['total_price'] is int) ? (data['total_price'] as int).toDouble() : (data['total_price'] ?? 0.0);
         });
       }
     } else {
-      totalPrice=0.0;
+      totalPrice = 0.0;
     }
   }
 
-  Future<List<ServiceModel>> fetchServices(id) async {
-    final response = await http.get(Uri.parse('${APIConfig.servicesEndpoint}?laundry_id=${id}'));
+  Future<void> fetchServices(int id, int? category) async {
+    String url = '${APIConfig.servicesEndpoint}?laundry_id=$id';
+    if (category != null && category != 0) {
+      url += '&category=$category'; // إضافة معلمة التصنيف إذا لم يكن "الكل"
+    }
+
+    final response = await http.get(Uri.parse(url));
+    print("Fetching services from: $url");
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
-      return data.map((item) => ServiceModel.fromJson(item)).toList();
+      setState(() {
+        _services = data.map((item) => ServiceModel.fromJson(item)).toList(); // تحديث القائمة مباشرة
+      });
     } else {
       throw Exception('المغسلة لا تمتلك خدمات');
     }
-  }
-
-  void showCustomBottomSheet(BuildContext context, ServiceModel service, int quantity) async {
-    await customModalBottomSheet(
-      context,
-      height: MediaQuery.of(context).size.height * 0.92,
-      child: ProductBuyNowScreen(
-        serviceId: service.id,
-        serviceName: service.name,
-        servicePrice: service.price * quantity,
-        serveiceUrgentPrice: service.urgentPrice * quantity,
-        serviceImage: service.image,
-        quantity: quantity,
-        laundry: widget.id,
-        distance: widget.distance,  // تمرير المسافة
-        duration: widget.duration, 
-      ),
-    );
-
-    // تحديث totalPrice بعد إغلاق الشاشة
-    await fetchTotalPrice(widget.id);
   }
  Future<void> saveLaundryData(String laundry) async {
     final prefs = await SharedPreferences.getInstance();
@@ -177,55 +171,85 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     }
   }
 
+  Future<List<CategoryModel>> fetchCategories(int id) async {
+    final response = await http.get(Uri.parse('${APIConfig.categoriesEndpoint}?laundry_id=$id'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      List<CategoryModel> categories = List<CategoryModel>.from(
+        data.map((item) => CategoryModel(
+          id: item['id'],
+          name: utf8.decode(item['name'].codeUnits),
+        ))
+      );
+
+      categories.insert(0, CategoryModel(id: 0, name: "الكل"));
+      return categories;
+    } else {
+      throw Exception('فشل في جلب التصنيفات');
+    }
+  }
+
+  void showCustomBottomSheet(BuildContext context, ServiceModel service, int quantity) async {
+    await customModalBottomSheet(
+      context,
+      height: MediaQuery.of(context).size.height * 0.92,
+      child: ProductBuyNowScreen(
+        serviceId: service.id,
+        serviceName: service.name,
+        servicePrice: service.price * quantity,
+        serveiceUrgentPrice: service.urgentPrice * quantity,
+        serviceImage: service.image,
+        quantity: quantity,
+        laundry: widget.id,
+        distance: widget.distance,
+        duration: widget.duration,
+      ),
+    );
+
+    await fetchTotalPrice(widget.id);
+  }
+
+  void filterServices(int categoryId) {
+    setState(() {
+      selectedCategory = categoryId; // تعيين التصنيف المحدد
+    });
+    fetchServices(widget.id, selectedCategory); // فقط تحديث الخدمات
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: CartButton(
         price: totalPrice,
         press: () async {
-          // تحقق مما إذا كانت قيمة totalPrice 0
           if (totalPrice == 0.0) {
-            // إذا كانت القيمة 0، أظهر رسالة للمستخدم
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('لا يمكن الانتقال إلى السلة لأن الإجمالي هو 0')),
             );
           } else {
-            // إذا كانت قيمة totalPrice ليست 0، قم بالانتقال إلى شاشة السلة
             await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => CartScreen(),
                 settings: RouteSettings(
-                  arguments:{
-                      'id': widget.id,  // تمرير الـ id هنا
-                      'distance': widget.distance, // تمرير المسافة
-                      'duration': widget.duration, // تمرير الوقت
-                    },
-                
+                  arguments: {
+                    'id': widget.id,
+                    'distance': widget.distance,
+                    'duration': widget.duration,
+                  },
                 ),
               ),
             );
 
-            // بعد العودة من شاشة السلة، قم بتحديث الإجمالي
             await fetchTotalPrice(widget.id);
-            // تحديث الإجمالي في واجهة المستخدم
-            setState(() {
-              // هنا يمكنك تحديث أي حالة إذا لزم الأمر، لكن في هذا المثال لا حاجة لذلك
-            });
           }
         },
       ),
       body: SafeArea(
-        child: FutureBuilder<List<ServiceModel>>(
-          future: _services,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('خطأ: ${snapshot.error}'));
-            } else if (snapshot.hasData) {
-              final services = snapshot.data!;
-              return CustomScrollView(
+        child: _services.isEmpty
+            ? const Center(child: CircularProgressIndicator())
+            : CustomScrollView(
                 slivers: [
                   SliverAppBar(
                     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -233,21 +257,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     actions: [
                       IconButton(
                         onPressed: () {
-                          saveLaundryData('1');
+                         saveLaundryData(widget.id.toString()); // منطق حفظ بيانات المغسلة
                         },
                         icon: SvgPicture.asset(
                           "assets/icons/Bookmark.svg",
                           color: Theme.of(context).textTheme.bodyLarge!.color,
                         ),
                       ),
-                       IconButton(
+                      IconButton(
                         onPressed: () {
-                          // الانتقال إلى شاشة الخريطة عند النقر على الزر
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MapScreen(
-                                id:widget.id,
+                                id: widget.id,
                                 latitude: widget.latitude,
                                 longitude: widget.longitude,
                               ),
@@ -255,7 +278,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           );
                         },
                         icon: SvgPicture.asset(
-                          "assets/icons/Location.svg", // تأكد من وجود أيقونة خريطة
+                          "assets/icons/Location.svg",
                           color: Theme.of(context).textTheme.bodyLarge!.color,
                         ),
                       ),
@@ -263,14 +286,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                   ProductImages(
                     images: [
-                      widget.image.isEmpty ? '${APIConfig.static_baseUrl}/images/store.jpg' : widget.image, // إذا كانت الصورة فارغة، استخدم الصورة الافتراضية
+                      widget.image.isEmpty ? '${APIConfig.static_baseUrl}/images/store.jpg' : widget.image,
                     ],
                   ),
                   SliverPadding(
                     padding: const EdgeInsets.all(defaultPadding),
                     sliver: SliverToBoxAdapter(
                       child: Text(
-                        widget.distance.toString()+"كم"+" - "+widget.duration.toString()+"دقيقة",
+                        "${widget.distance} كم - ${widget.duration} دقيقة",
                         style: Theme.of(context).textTheme.titleSmall!,
                       ),
                     ),
@@ -283,8 +306,49 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     rating: 4.3,
                     numOfReviews: 126,
                   ),
-                  
-                  
+                  SliverPadding(
+                    padding: const EdgeInsets.all(defaultPadding),
+                    sliver: SliverToBoxAdapter(
+                      child: FutureBuilder<List<CategoryModel>>(
+                        future: _categories,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(child: Text('خطأ في جلب التصنيفات'));
+                          } else if (snapshot.hasData) {
+                            final categories = snapshot.data!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: categories.map((category) {
+                                      final isSelected = selectedCategory == category.id; // تعديل هنا
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 8.0),
+                                        child: GestureDetector(
+                                          onTap: () => filterServices(category.id), // استخدام id هنا
+                                          child: Chip(
+                                            label: Text(category.name),
+                                            backgroundColor: isSelected ? primaryColor : primaryColor.withOpacity(0.2),
+                                            labelStyle: TextStyle(color: isSelected ? Colors.white : primaryColor),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return const Center(child: Text('لا توجد تصنيفات'));
+                          }
+                        },
+                      ),
+                    ),
+                  ),
                   SliverPadding(
                     padding: const EdgeInsets.all(defaultPadding),
                     sliver: SliverToBoxAdapter(
@@ -297,13 +361,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final service = services[index];
+                        final service = _services[index]; // استخدام القائمة المحلية
                         return Card(
-                        color: secondaryColor,
+                          color: secondaryColor,
                           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                           child: ListTile(
                             leading: Image.network(
-                              service.image.isEmpty ? '${APIConfig.static_baseUrl}/images/store.jpg' : service.image,  // استخدم الصورة الافتراضية إذا كانت الصورة فارغة
+                              service.image.isEmpty ? '${APIConfig.static_baseUrl}/images/store.jpg' : service.image,
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
@@ -313,22 +377,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             trailing: IconButton(
                               icon: const Icon(Icons.add, color: Color.fromARGB(255, 255, 255, 255)),
                               onPressed: () {
-                                showCustomBottomSheet(context, service, 1); // يمكنك هنا تعديل الكمية
+                                showCustomBottomSheet(context, service, 1);
                               },
                             ),
-                          ),
+                          )
                         );
                       },
-                      childCount: services.length,
+                      childCount: _services.length,
                     ),
                   ),
                 ],
-              );
-            } else {
-              return const Center(child: Text('لا توجد بيانات للخدمات'));
-            }
-          },
-        ),
+              ),
       ),
     );
   }

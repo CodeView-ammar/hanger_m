@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/components/list_tile/divider_list_tile.dart';
 import 'package:shop/constants.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/screen_export.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,27 +66,27 @@ class ProfileScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
                         child: Text(
-                          "حساب",
+                          AppLocalizations.of(context)!.account,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                       const SizedBox(height: defaultPadding / 2),
                       ProfileMenuListTile(
-                        text: "طلبات",
+                        text: AppLocalizations.of(context)!.requests,
                         svgSrc: "assets/icons/Order.svg",
                         press: () {
                           Navigator.pushNamed(context, ordersScreenRoute);
                         },
                       ),
                       ProfileMenuListTile(
-                        text: "العناوين",
+                        text: AppLocalizations.of(context)!.address,
                         svgSrc: "assets/icons/Address.svg",
                         press: () {
                           Navigator.pushNamed(context, addressesScreenRoute);
                         },
                       ),
                       ProfileMenuListTile(
-                        text: "محفظة",
+                        text: AppLocalizations.of(context)!.wallet,
                         svgSrc: "assets/icons/Wallet.svg",
                         press: () {
                           Navigator.pushNamed(context, walletScreenRoute);
@@ -96,13 +97,13 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: defaultPadding, vertical: defaultPadding / 2),
                         child: Text(
-                          "التخصيص",
+                          AppLocalizations.of(context)!.customize,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                       DividerListTileWithTrilingText(
                         svgSrc: "assets/icons/Notification.svg",
-                        title: "إشعار",
+                        title: AppLocalizations.of(context)!.notifications,
                         trilingText: isNotificationEnabled ? "On" : "Off", // تغيير النص بناءً على الحالة
                         press: () {
                           Navigator.pushNamed(context, enableNotificationScreenRoute);
@@ -113,12 +114,12 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: defaultPadding, vertical: defaultPadding / 2),
                         child: Text(
-                          "إعدادات",
+                          AppLocalizations.of(context)!.settings,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                       ProfileMenuListTile(
-                        text: "موقع",
+                        text: AppLocalizations.of(context)!.location,
                         svgSrc: "assets/icons/Location.svg",
                         press: () {},
                       ),
@@ -127,19 +128,19 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: defaultPadding, vertical: defaultPadding / 2),
                         child: Text(
-                          "المساعدة والدعم",
+                          AppLocalizations.of(context)!.helpandsupport,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
                       ProfileMenuListTile(
-                        text: "احصل على المساعدة",
+                        text: AppLocalizations.of(context)!.helpandsupport,
                         svgSrc: "assets/icons/Help.svg",
                         press: () {
                           Navigator.pushNamed(context, getHelpScreenRoute);
                         },
                       ),
                       ProfileMenuListTile(
-                        text: "التعليمات",
+                        text: AppLocalizations.of(context)!.instructions,
                         svgSrc: "assets/icons/FAQ.svg",
                         press: () {
                           Navigator.pushNamed(context, instructionsScreenRoute);
@@ -178,7 +179,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         ),
                         title: Text(
-                          userPhoneNumber.isEmpty ? "تسجيل الدخول" : "تسجيل الخروج",
+                          userPhoneNumber.isEmpty ? AppLocalizations.of(context)!.login : AppLocalizations.of(context)!.logout,
                           style: TextStyle(
                             color: userPhoneNumber.isEmpty ? Colors.green : errorColor,
                             fontSize: 14,

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/components/dot_indicators.dart';
+import 'package:shop/l10n/language_helper.dart';
 import 'package:shop/constants.dart';
+import 'package:shop/main.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'components/onbording_content.dart';
+import 'package:shop/l10n/app_localizations.dart';
 
 class OnBordingScreen extends StatefulWidget {
   const OnBordingScreen({super.key});
@@ -14,6 +16,7 @@ class OnBordingScreen extends StatefulWidget {
   State<OnBordingScreen> createState() => _OnBordingScreenState();
 }
 
+
 class _OnBordingScreenState extends State<OnBordingScreen> {
   late PageController _pageController;
   int _pageIndex = 0;
@@ -21,36 +24,33 @@ class _OnBordingScreenState extends State<OnBordingScreen> {
     Onbord(
       image: "assets/Illustration/Illustration-0.png",
       imageDarkTheme: "assets/Illustration/Illustration-0.png",
-      title: "ابحث عن المغاسل التي بالقرب منك",
-      description:
-          "هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك",
+      title:"search_laundries",
+      description:"find_laundries_nearby",
     ),
     Onbord(
       image: "assets/Illustration/Illustration-1.png",
       imageDarkTheme: "assets/Illustration/Illustration-1.png",
-      title: "قم بإختيار المغسلة وإختيار انواع الثياب التي تريد ان تغسلها وضعها في السلة",
-      description:
-          "قم بإختيار المغسلة وإختيار انواع الثياب التي تريد ان تغسلها وضعها في السلة وسيتم الوصول إلا موقعك من قبل الدلفري الخاص بنا وتوصيلها للمغسلة المراد ",
+      title:"choose_laundry_and_clothes",
+      description:"choose_and_deliver",
     ),
     Onbord(
       image: "assets/Illustration/Illustration-2.png",
       imageDarkTheme: "assets/Illustration/Illustration-2.png",
-      title: "دفع \nسريع وآمن",
-      description: "هناك العديد من خيارات الدفع المتاحة لراحتك.",
+      title: "quick_and_safe_payment",
+      description:"multiple_payment_options" ,
     ),
     Onbord(
       image: "assets/Illustration/Illustration-3.png",
       imageDarkTheme: "assets/Illustration/Illustration-3.png",
-      title: "تتبع الطلب",
+      title: "track_order",
       description:
-          "على وجه الخصوص، يمكن لـ معلاق تعبئة طلباتك، ومساعدتك في إدارة شحناتك بسلاسة.",
+      "manage_shipments"          ,
     ),
     Onbord(
       image: "assets/Illustration/Illustration-4.png",
       imageDarkTheme: "assets/Illustration/Illustration-4.png",
-      title: "المغاسل القريبة",
-      description:
-          "يمكنك بسهولة تتبع مغاسل وتصفح العناصر الخاصة بهم والحصول على معلومات حول خدماتهم.",
+      title: "nearby_laundries",
+      description:"browse_and_get_info",
     ),
   ];
 
@@ -72,105 +72,158 @@ class _OnBordingScreenState extends State<OnBordingScreen> {
     return prefs.getString('userPhone') != null;
   }
 
-  // دالة للتنقل بناءً على حالة الرقم
   void _navigateBasedOnPhoneStatus() async {
-    // bool isPhoneRegistered = await _isPhoneNumberRegistered();
     
-    // if (isPhoneRegistered) {
-    //   Navigator.pushNamedAndRemoveUntil(
-    //       context,
-    //       entryPointScreenRoute, // الشاشة التي تلي التحقق
-    //       ModalRoute.withName(logInScreenRoute),
-    //     ); // التوجه إلى الشاشة الرئيسية
-    // } else {
-      Navigator.pushNamed(context, entryPointScreenRoute); // التوجه إلى شاشة تسجيل الدخول
-    // }
+      Navigator.pushNamed(context, WelcomeScreenScreenRoute); // التوجه إلى شاشة تسجيل الدخول
   }
+  
+  String? get_translation(BuildContext context, String key) {
+    final localizations = AppLocalizations.of(context);
+    final translations = {
+      'skip': localizations?.skip,
+      'search_laundries': localizations?.search_laundries,
+      'find_laundries_nearby': localizations?.find_laundries_nearby,
+      'choose_laundry_and_clothes': localizations?.choose_laundry_and_clothes,
+      'choose_and_deliver': localizations?.choose_and_deliver,
+      'quick_and_safe_payment': localizations?.quick_and_safe_payment,
+      'multiple_payment_options': localizations?.multiple_payment_options,
+      'track_order': localizations?.track_order,
+      'manage_shipments': localizations?.manage_shipments,
+      'nearby_laundries': localizations?.nearby_laundries,
+      'browse_and_get_info': localizations?.browse_and_get_info,
+      'title_app': localizations?.title_app,
+    };
+    return translations[key];
+  }
+void changelangoing(BuildContext context) async {
+  String? currentLanguage = await LanguageHelper.getCurrentLanguage();
 
+  // تحديد اللغة الجديدة بناءً على اللغة الحالية
+  String newLanguage = (currentLanguage == 'en') ? 'ar' : 'en';
+
+  // حفظ اللغة الجديدة في الكاش
+  await LanguageHelper.setLanguage(newLanguage);
+
+  // إعادة تشغيل التطبيق فقط إذا كانت الـ widget ما زالت موجودة في الـ tree
+  if (mounted) {
+    RestartWidget.restartApp(context);
+  }
+}
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
-          child: Column(
+   return Scaffold(
+  body: SafeArea(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: defaultPadding),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    _navigateBasedOnPhoneStatus();
-                  },
-                  child: const Text(
-                    "تخطي",
-                    style: TextStyle(
-                        color: primaryColor),
-                  ),
+              TextButton(
+                onPressed: () {
+                  _navigateBasedOnPhoneStatus();
+                },
+                child: Text(
+                  AppLocalizations.of(context)!.skip,
+                  style: const TextStyle(color: primaryColor),
                 ),
               ),
-              Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: _onbordData.length,
-                  onPageChanged: (value) {
-                    setState(() {
-                      _pageIndex = value;
-                    });
-                  },
-                  itemBuilder: (context, index) => OnbordingContent(
-                    title: _onbordData[index].title,
-                    description: _onbordData[index].description,
-                    image: (Theme.of(context).brightness == Brightness.light &&
-                            _onbordData[index].imageDarkTheme != null)
-                        ? _onbordData[index].imageDarkTheme!
-                        : _onbordData[index].image,
-                    isTextOnTop: index.isOdd,
-                  ),
-                ),
-              ),
-              Row(
-                children: [
-                  ...List.generate(
-                    _onbordData.length,
-                    (index) => Padding(
-                      padding: const EdgeInsets.only(right: defaultPadding / 4),
-                      child: DotIndicator(isActive: index == _pageIndex),
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    height: 60,
-                    width: 60,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_pageIndex < _onbordData.length - 1) {
-                          _pageController.nextPage(
-                              curve: Curves.ease, duration: defaultDuration);
-                        } else {
-                          _navigateBasedOnPhoneStatus();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: const CircleBorder(),
+              const SizedBox(width: 140), // إضافة مسافة بين الزرين
+              TextButton(
+                onPressed: () {
+                  changelangoing(context);
+                },
+                child: Row(
+                    children: [
+                      Icon(
+                        Icons.language,  // أيقونة اللغة
+                        color: primaryColor, // لون الأيقونة
                       ),
-                      child: SvgPicture.asset(
-                        "assets/icons/Arrow - Right.svg",
-                        colorFilter: const ColorFilter.mode(
-                          Colors.white,
-                          BlendMode.srcIn,
-                        ),
+                      SizedBox(width: 8), // المسافة بين الأيقونة والكلمة
+                      FutureBuilder<String?>(
+                        future: LanguageHelper.getCurrentLanguage(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else {
+                            String currentLanguage = snapshot.data ?? 'ar';
+                            return Text(
+                              currentLanguage == 'ar' ? 'انجليزي' : 'عربي', // هنا تعتمد على اللغة المخزنة
+                              style: const TextStyle(color: primaryColor),
+                            );
+                          }
+                        },
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: defaultPadding),
+                      SizedBox(width: 18), // المسافة بين الأيقونة والكلمة
+                    ],
+              ),)
             ],
           ),
-        ),
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: _onbordData.length,
+              onPageChanged: (value) {
+                setState(() {
+                  _pageIndex = value;
+                });
+              },
+              itemBuilder: (context, index) => OnbordingContent(
+
+              title:  get_translation(context, _onbordData[index].title) ?? "",
+              description:  get_translation(context, _onbordData[index].description) ?? "",
+              image: (Theme.of(context).brightness == Brightness.light &&
+                      _onbordData[index].imageDarkTheme != null)
+                  ? _onbordData[index].imageDarkTheme!
+                  : _onbordData[index].image,
+              isTextOnTop: index.isOdd,
+              )
+            ),
+          ),
+          Row(
+            children: [
+              ...List.generate(
+                _onbordData.length,
+                (index) => Padding(
+                  padding: const EdgeInsets.only(right: defaultPadding / 4),
+                  child: DotIndicator(isActive: index == _pageIndex),
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                height: 60,
+                width: 60,
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (_pageIndex < _onbordData.length - 1) {
+                      _pageController.nextPage(
+                          curve: Curves.ease, duration: defaultDuration);
+                    } else {
+                      _navigateBasedOnPhoneStatus();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                  ),
+                  child: SvgPicture.asset(
+                    "assets/icons/Arrow - Right.svg",
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: defaultPadding),
+        ],
       ),
-    );
-  }
+    ),
+  ),
+);  }
+
 }
 
 class Onbord {

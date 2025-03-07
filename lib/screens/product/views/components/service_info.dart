@@ -30,20 +30,20 @@ class ServiceInfo extends StatelessWidget {
               brand.toUpperCase(),
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
-            const SizedBox(height: defaultPadding / 2),
+            // const SizedBox(height: defaultPadding / 2),
             Text(
               title,
               maxLines: 2,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: defaultPadding),
-            const Row(
-              children: [
-                Spacer(),
-                SizedBox(width: defaultPadding / 4),
-                              ],
-            ),
-            const SizedBox(height: defaultPadding / 2),
+            // const SizedBox(height: defaultPadding),
+            // const Row(
+            //   children: [
+            //     Spacer(),
+            //     SizedBox(width: defaultPadding / 4),
+            //                   ],
+            // ),
+            // const SizedBox(height: defaultPadding / 2),
           ],
         ),
       ),

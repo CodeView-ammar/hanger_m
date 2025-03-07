@@ -33,35 +33,6 @@ class FlashSale extends StatelessWidget {
         ),
         // While loading show 👇
         // const ProductsSkelton(),
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            // Find demoFlashSaleProducts on models/ProductModel.dart
-            itemCount: demoFlashSaleProducts.length,
-            itemBuilder: (context, index) => Padding(
-              padding: EdgeInsets.only(
-                left: defaultPadding,
-                right: index == demoFlashSaleProducts.length - 1
-                    ? defaultPadding
-                    : 0,
-              ),
-              child: ProductCard(
-                image: demoFlashSaleProducts[index].image,
-                brandName: demoFlashSaleProducts[index].brandName,
-                title: demoFlashSaleProducts[index].title,
-                price: demoFlashSaleProducts[index].price,
-                priceAfetDiscount:
-                    demoFlashSaleProducts[index].priceAfetDiscount,
-                dicountpercent: demoFlashSaleProducts[index].dicountpercent,
-                press: () {
-                  Navigator.pushNamed(context, productDetailsScreenRoute,
-                      arguments: index.isEven);
-                },
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

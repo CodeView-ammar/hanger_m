@@ -4,7 +4,9 @@ class APIConfig {
  
   static const String static_baseUrl='$_baseUrl/static';
 
+
   static String get launderiesEndpoint => '$api_baseUrl/laundries/';
+  static String get categoriesEndpoint => '$api_baseUrl/categores/';
   static String get bannerEndpoint => '$api_baseUrl/slide-show/';
   static String get userEndpoint => '$api_baseUrl/users/register/';
   static String get markEndpoint_get => '$api_baseUrl/user_laundry_marks_a/';

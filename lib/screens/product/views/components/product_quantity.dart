@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shop/l10n/app_localizations.dart';
 
 import '../../../../constants.dart';
 
@@ -20,7 +21,7 @@ class ProductQuantity extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "كمية",
+          AppLocalizations.of(context)!.qty,
           style: Theme.of(context).textTheme.titleSmall,
         ),
         const SizedBox(height: defaultPadding),

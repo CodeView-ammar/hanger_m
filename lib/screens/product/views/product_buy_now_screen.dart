@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';  // لاستخدا�
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/components/cart_button.dart';
 import 'package:shop/components/custom_modal_bottom_sheet.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shop/screens/product/views/added_to_cart_message_screen.dart';
 
@@ -183,9 +184,9 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("نوع الخدمة:", style: Theme.of(context).textTheme.bodyLarge),
+                            Text(AppLocalizations.of(context)!.servicetype, style: Theme.of(context).textTheme.bodyLarge),
                             ListTile(
-                              title: Text("عادية"),
+                              title: Text(AppLocalizations.of(context)!.normal),
                               leading: Transform.scale(
                                 scale: 1.5,  // تكبير الراديو بوتون
                                 child: Radio<String>(
@@ -201,7 +202,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                               ),
                             ),
                             ListTile(
-                              title: Text("مستعجلة"),
+                              title: Text(AppLocalizations.of(context)!.urgent),
                               leading: Transform.scale(
                                 scale: 1.5,  // تكبير الراديو بوتون
                                 child: Radio<String>(

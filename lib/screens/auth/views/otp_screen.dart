@@ -1,16 +1,18 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // لإضافة Clipboard
 import 'package:shop/components/api_extintion/otp_api.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/constants.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 
 class VerifyOTPScreen extends StatefulWidget {
-  final String phone; // استلام رقم الهاتف من شاشة تسجيل الدخول
+  final String phone;
 
   const VerifyOTPScreen({Key? key, required this.phone}) : super(key: key);
 
@@ -25,79 +27,29 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
   final TextEditingController _otpController3 = TextEditingController();
   final TextEditingController _otpController4 = TextEditingController();
 
-  // جمع القيم من الحقول الأربعة
+  bool _canResend = true;
+  int _countdown = 60;
+  Timer? _timer;
+
   String get otp {
     return _otpController1.text + _otpController2.text + _otpController3.text + _otpController4.text;
   }
+  Future<bool> logIn(String phone, String id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userPhone', phone);
+    await prefs.setString('userid', id);
 
-  // دالة لإعادة إرسال OTP
-  Future<void> _resendOTP() async {
-    var authService = AuthService();
-    bool success = await authService.sendOTP(widget.phone);
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("تم إعادة إرسال OTP")),
-      );
-    } else {
-      _showErrorDialog("خطأ في إعادة إرسال الرمز");
-    }
+    await location(); // جلب الموقع وحفظه
+    return true; // افترض أن تسجيل الدخول ناجح
   }
 
-  Future<String?> saveDataToApi(Map<String, dynamic> data) async {
-    try {
-      // تحقق مما إذا كان رقم الجوال موجودًا مسبقًا
-      final phone = data['phone']; // افترض أن رقم الجوال موجود في الـ data
-      final checkResponse = await http.get(
-        Uri.parse('${APIConfig.otpphoneEndpoint}$phone'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (checkResponse.statusCode == 200) {
-        final checkData = json.decode(checkResponse.body);
-        if (checkData.isNotEmpty) {
-          // إذا كان رقم الجوال موجودًا، إرجاع الـ id
-          return checkData[0]['id'].toString();
-        }
-      }
-
-      // إرسال البيانات عبر HTTP POST إذا لم يكن رقم الجوال موجودًا
-      final response = await http.post(
-        Uri.parse(APIConfig.useraddEndpoint),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode(data),
-      );
-
-      // التحقق من حالة الاستجابة
-      if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
-        print("Data submitted successfully.");
-        return responseData['id'].toString();
-      } else {
-        try {
-          final responseData = json.decode(response.body);
-          print("API error: ${responseData['detail'] ?? 'Unknown error'}");
-        } catch (e) {
-          print("Error parsing response: $e");
-          print("Response body: ${response.body}");
-        }
-        return "";
-      }
-    } catch (e) {
-      print("Error: $e");
-      return "";
-    }
-  }
 
   Future<Position> _getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        throw Exception('Permissions are denied');
+        throw Exception('تم رفض الأذونات');
       }
     }
 
@@ -111,36 +63,103 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
       await prefs.setDouble('latitude', position.latitude);
       await prefs.setDouble('longitude', position.longitude);
     } catch (e) {
-      print('Error getting location: $e');
+      print('خطأ في الحصول على الموقع: $e');
       return false;
     }
     return true;
   }
 
-  Future<bool> logIn(String phone, String id) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userPhone', phone);
-    await prefs.setString('userid', id);
+  Future<void> _resendOTP() async {
+    if (!_canResend) return;
+    setState(() {
+      _canResend = false;
+      _countdown = 60;
+    });
 
-    location();
-    // جلب الموقع وحفظه
-
-    return true; // افترض أن تسجيل الدخول ناجح
+    var authService = AuthService();
+    bool success = await authService.sendOTP(widget.phone);
+    if (success) {
+      _startCountdown();
+    } else {
+      _showErrorDialog("خطأ في إعادة إرسال الرمز");
+    }
   }
 
-  // دالة للصق النص من الحافظة
+  void _startCountdown() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 0) {
+          _countdown--;
+        } else {
+          _canResend = true;
+          _timer?.cancel();
+        }
+      });
+    });
+  }
+
+  Future<String?> saveDataToApi(Map<String, dynamic> data) async {
+    try {
+      // تحقق مما إذا كان رقم الجوال موجودًا مسبقًا
+      final phone = data['phone'];
+      final checkResponse = await http.get(
+        Uri.parse('${APIConfig.otpphoneEndpoint}$phone'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (checkResponse.statusCode == 200) {
+        final checkData = json.decode(checkResponse.body);
+        if (checkData.isNotEmpty) {
+          return checkData[0]['id'].toString();
+        }
+      }
+
+      // إرسال البيانات عبر HTTP POST إذا لم يكن رقم الجوال موجودًا
+      final response = await http.post(
+        Uri.parse(APIConfig.useraddEndpoint),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(data),
+      );
+
+      if (response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        print("تم تقديم البيانات بنجاح.");
+        return responseData['id'].toString();
+      } else {
+        print("خطأ في واجهة برمجة التطبيقات: ${response.body}");
+        return "";
+      }
+    } catch (e) {
+      print("خطأ: $e");
+      return "";
+    }
+  }
+
   Future<void> _pasteOTPFromClipboard() async {
     final clipboardText = await Clipboard.getData('text/plain');
     if (clipboardText != null && clipboardText.text != null) {
-      String otpFromClipboard = clipboardText.text!;
+      String otpFromClipboard = clipboardText.text!.trim();
       if (otpFromClipboard.length == 4 && otpFromClipboard.contains(RegExp(r'^\d{4}$'))) {
-        // لصق الرمز مباشرة في الحقول
-        _otpController1.text = otpFromClipboard[0];
-        _otpController2.text = otpFromClipboard[1];
-        _otpController3.text = otpFromClipboard[2];
-        _otpController4.text = otpFromClipboard[3];
+        setState(() {
+          _otpController1.text = otpFromClipboard[0];
+          _otpController2.text = otpFromClipboard[1];
+          _otpController3.text = otpFromClipboard[2];
+          _otpController4.text = otpFromClipboard[3];
+        });
+      } else {
+        _showErrorDialog("الرمز غير صحيح، يرجى لصق رمز مكون من 4 أرقام فقط.");
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -163,11 +182,8 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: defaultPadding / 2),
-                  const Text(
-                    "أدخل الرمز المرسل إلى رقم هاتفك",
-                  ),
+                  const Text("أدخل الرمز المرسل إلى رقم هاتفك"),
                   const SizedBox(height: defaultPadding),
-                  // النموذج مع أربع خانات لإدخال الـ OTP
                   Form(
                     key: _formKey,
                     child: Row(
@@ -181,12 +197,19 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                     ),
                   ),
                   const SizedBox(height: defaultPadding),
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: _pasteOTPFromClipboard,
+                      icon: const Icon(Icons.paste),
+                      label: const Text("لصق الرمز"),
+                    ),
+                  ),
+                  const SizedBox(height: defaultPadding),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState?.validate() ?? false) {
-                        String otpCode = otp; // جمع الـ OTP من الحقول الأربعة
+                        String otpCode = otp;
                         var authService = AuthService();
-                        // التحقق من الرمز
                         bool success = await authService.verifyOTP(widget.phone, otpCode);
                         if (success) {
                           Map<String, dynamic> userData = {
@@ -197,21 +220,15 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                           };
                           String? id = await saveDataToApi(userData);
 
-                          // تحقق مما إذا كان الـ id تم استرجاعه بنجاح
                           if (id != null) {
-                            // استدعاء دالة تسجيل الدخول مع رقم الهاتف والـ id
-                            await logIn(widget.phone, id); // أضف await هنا
-                          } else {
-                            print("فشل في حفظ البيانات أو استرجاع الـ id.");
+                            await logIn(widget.phone, id);
+                            Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              entryPointScreenRoute,
+                              ModalRoute.withName(logInScreenRoute),
+                            );
                           }
-                          location();
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            entryPointScreenRoute, // الشاشة التي تلي التحقق
-                            ModalRoute.withName(logInScreenRoute),
-                          );
                         } else {
-                          // عرض رسالة خطأ للمستخدم
                           _showErrorDialog("خطأ في التحقق من الرمز");
                         }
                       }
@@ -220,8 +237,8 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
                   ),
                   const SizedBox(height: defaultPadding),
                   TextButton(
-                    onPressed: _resendOTP,
-                    child: const Text("إعادة إرسال الرمز"),
+                    onPressed: _canResend ? _resendOTP : null,
+                    child: Text(_canResend ? "إعادة إرسال الرمز" : "انتظر $_countdown ثانية"),
                   ),
                 ],
               ),
@@ -232,7 +249,6 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
     );
   }
 
-  // دالة بناء حقل OTP مخصص
   Widget _buildOTPField({required TextEditingController controller}) {
     return SizedBox(
       width: 50,
@@ -240,42 +256,38 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
         controller: controller,
         decoration: const InputDecoration(
           border: OutlineInputBorder(),
-          counterText: "", // إخفاء العداد
+          counterText: "",
         ),
-        maxLength: 1, // الحد الأقصى لعدد الأحرف هو 1
+        maxLength: 1,
         keyboardType: TextInputType.number,
         textAlign: TextAlign.center,
         onChanged: (value) {
           if (value.length == 1) {
-            // الانتقال إلى الحقل التالي تلقائيًا
             FocusScope.of(context).nextFocus();
           } else if (value.isEmpty) {
-            // العودة إلى الحقل السابق إذا تم مسح القيمة
             FocusScope.of(context).previousFocus();
           }
         },
         validator: (value) {
           if (value == null || value.isEmpty) {
-            return 'الرجاء إدخال الرمز';
+            return 'أدخل الرقم';
           }
           return null;
         },
-        onEditingComplete: _pasteOTPFromClipboard, // عند الانتهاء من التحرير، حاول الصق الرمز من الحافظة
       ),
     );
   }
 
-  // دالة لعرض رسالة الخطأ
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('خطأ'),
+          title: Text(AppLocalizations.of(context)!.error),
           content: Text(message),
           actions: [
             TextButton(
-              child: const Text('موافق'),
+              child:  Text(AppLocalizations.of(context)!.oK),
               onPressed: () {
                 Navigator.of(context).pop();
               },

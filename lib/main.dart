@@ -1,15 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shop/route/router.dart' as router;
 import 'package:shop/theme/app_theme.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';  // إضافة المكتبة هنا
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   runApp(const MyApp());
   initNotifications();  // تهيئة الإشعارات عند بداية التطبيق
+}
+
+class RestartWidget extends StatefulWidget {
+  final Widget child;
+  const RestartWidget({Key? key, required this.child}) : super(key: key);
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()?.restartApp();
+  }
+
+  @override
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
+    );
+  }
 }
 
 // إنشاء مثيل من FlutterLocalNotificationsPlugin
@@ -28,7 +60,6 @@ void initNotifications() async {
     defaultPresentBadge: true,
     defaultPresentBanner: true,
     defaultPresentList: true,
-    // يمكنك إضافة فئات الإشعارات هنا إذا كنت بحاجة إليها
   );
 
   final InitializationSettings initializationSettings = InitializationSettings(
@@ -48,11 +79,14 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _locationFetched = false;
+  Locale _appLocale = const Locale('ar'); // اللغة الافتراضية العربية
 
   @override
   void initState() {
     super.initState();
+    runApp(const RestartWidget(child: MyApp()));
     _fetchLocation(); // استدعاء دالة جلب الموقع عند بداية التطبيق
+    _fetchLanguage(); // جلب اللغة من الكاش
   }
 
   Future<void> _fetchLocation() async {
@@ -81,25 +115,42 @@ class _MyAppState extends State<MyApp> {
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
+  // جلب اللغة من الكاش
+  Future<void> _fetchLanguage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? languageCode = prefs.getString('language_code');
+    
+    if (languageCode != null) {
+      setState(() {
+        _appLocale = Locale(languageCode); // تعيين اللغة من الكاش إذا كانت موجودة
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return  
-    MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'معلاق لخدمات المغاسل',
+      title: AppLocalizations.of(context)?.title_app ?? 'Laundry App',
       theme: AppTheme.lightTheme(context),
       themeMode: ThemeMode.light,
       onGenerateRoute: router.generateRoute,
       initialRoute: onbordingScreenRoute,
-      locale: const Locale('ar'),
+      locale: _appLocale, // استخدام اللغة من الكاش أو الافتراضي
       supportedLocales: const [
-        Locale('ar'), // دعم اللغة العربية
+        Locale('ar'), 
+        Locale('en'), 
       ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+       localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localeResolutionCallback: (locale, supportedLocales) {
+        // إذا كانت اللغة موجودة في supportedLocales، استخدمها
+        for (var supportedLocale in supportedLocales) {
+          if (supportedLocale.languageCode == locale?.languageCode) {
+            return supportedLocale;
+          }
+        }
+        return supportedLocales.first; // اللغة الافتراضية
+      },
     );
   }
 }

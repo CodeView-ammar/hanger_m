@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:moyasar/moyasar.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/screens/checkout/transaction.dart';
@@ -28,17 +29,47 @@ class _AddCardScreenState extends State<AddCardScreen> {
   void initState() {
     super.initState();
   }
+   Future<void> addPaymentMethod(String name, String description, BuildContext context) async {
+    final url = Uri.parse(APIConfig.addPaymentUrl);
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userid');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'name': name,
+          'description': description,
+          'is_active': true,
+          'user': userId,
+          'default': true,
+        }),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print('تم إضافة طريقة الدفع بنجاح');
+        Navigator.pop(context);
+      } else {
+        print('حدث خطأ: ${response.body}');
+      }
+    } catch (e) {
+      print('فشل الاتصال بالخادم: $e');
+    }
+  }
 
   void onPaymentResult(BuildContext context, PaymentResponse result) {
     if (result is PaymentResponse) {
       switch (result.status) {
         case PaymentStatus.paid:
-          // addTransaction(
-          //   "debit",
-          //   widget.total,
-          //    "تم دفع المبلغ",
-          //     context
-          //     );
+          addTransaction(
+            "debit",
+            "deposit",
+            widget.total,
+              "تم ايداع المبلغ مقابل فاتورة ",
+              context
+              );
+          addPaymentMethod('CARD', 'الدفع عند الاستلام', context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("تم الدفع بنجاح")),
           );

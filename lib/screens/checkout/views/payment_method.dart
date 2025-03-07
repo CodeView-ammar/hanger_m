@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/screens/checkout/tools/add_card_screen.dart';
+import 'package:shop/screens/checkout/views/review_order.dart';
 
 class AddCardDetailsScreen extends StatefulWidget {
   final String name_windows;
@@ -49,7 +50,20 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('تم إضافة طريقة الدفع بنجاح');
-        Navigator.pop(context);
+        if(name=="COD"){
+               Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReviewOrderScreen(
+                laundryId: laundryId,  
+                total: totalAmount ?? 0.0,  
+                isPaid: false,
+                distance: 0,
+                duration: '',
+              ),
+            ),
+          );
+        }
       } else {
         print('حدث خطأ: ${response.body}');
       }

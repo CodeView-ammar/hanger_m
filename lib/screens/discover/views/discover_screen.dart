@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/constants.dart';
 import 'package:intl/intl.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shop/screens/discover/views/order_details.dart';
 
@@ -219,10 +220,10 @@ Color _getStatusColor(String status) {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Padding(
+             Padding(
               padding: EdgeInsets.all(defaultPadding),
               child: Text(
-                "قائمة الطلبات",
+                 AppLocalizations.of(context)!.order_list,  // ترجمة العنوان
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
@@ -301,12 +302,12 @@ Color _getStatusColor(String status) {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("يجب أن تكون مسجل دخول لعرض الطلبات"),
+                        Text(AppLocalizations.of(context)!.meslogin),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.pushNamed(context, logInScreenRoute);
                           },
-                          child: Text("تسجيل الدخول"),
+                          child: Text(AppLocalizations.of(context)!.login),
                         ),
                       ],
                     ),

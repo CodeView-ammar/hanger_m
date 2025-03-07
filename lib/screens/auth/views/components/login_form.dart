@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import '../../../../constants.dart';
 
 class LogInForm extends StatelessWidget {
@@ -50,8 +51,8 @@ class LogInForm extends StatelessWidget {
                   
                   textInputAction: TextInputAction.next,
                   keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    hintText: "رقم الجوال",
+                  decoration:  InputDecoration(
+                    hintText: AppLocalizations.of(context)!.numberphone,
                   ),
                 ),
               ),

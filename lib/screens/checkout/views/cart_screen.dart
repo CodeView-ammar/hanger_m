@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:http/http.dart' as http;
 import 'package:shop/constants.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/screens/checkout/views/review_order.dart';
 
 class CartScreen extends StatefulWidget {
@@ -52,7 +53,7 @@ Future<void> removeItemFromCart(int laundryId, int serviceId) async {
             content: Text(errorMessage),
             actions: <Widget>[
               TextButton(
-                child: const Text('موافق'),
+                child: Text(AppLocalizations.of(context)!.oK),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -69,7 +70,7 @@ Future<void> removeItemFromCart(int laundryId, int serviceId) async {
           content: const Text('لم يتم العثور على معرف المستخدم. يرجى تسجيل الدخول أولاً.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('موافق'),
+              child: Text(AppLocalizations.of(context)!.oK),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -108,11 +109,11 @@ Future<void> updateCartQuantity(int laundryId, int serviceId, int newQuantity) a
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('خطأ'),
+            title:  Text(AppLocalizations.of(context)!.error),
             content: Text(errorMessage),
             actions: <Widget>[
               TextButton(
-                child: const Text('موافق'),
+                child:  Text(AppLocalizations.of(context)!.oK),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -126,11 +127,11 @@ Future<void> updateCartQuantity(int laundryId, int serviceId, int newQuantity) a
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('خطأ'),
+          title:  Text(AppLocalizations.of(context)!.error),
           content: const Text('لم يتم العثور على معرف المستخدم. يرجى تسجيل الدخول أولاً.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('موافق'),
+              child: Text(AppLocalizations.of(context)!.oK),
               onPressed: () => Navigator.pop(context),
             ),
           ],
@@ -172,11 +173,11 @@ Future<void> fetchCartData(int laundryId) async {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('خطأ'),
+          title: Text(AppLocalizations.of(context)!.error),
           content: const Text('لم يتم العثور على معرف المستخدم. يرجى تسجيل الدخول أولاً.'),
           actions: <Widget>[
             TextButton(
-              child: const Text('موافق'),
+              child: Text(AppLocalizations.of(context)!.oK),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -237,7 +238,7 @@ double distance = 0.0; // متغير للمسافة
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("سلة التسوق"),
+        title:  Text(AppLocalizations.of(context)!.shoppingcart),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -258,7 +259,7 @@ double distance = 0.0; // متغير للمسافة
                           child: ListTile(
                             textColor: Colors.white,
                             title: Text(utf8.decode(item['service_name'].codeUnits)),
-                            subtitle: Text("سعر: \ر.س ${item['price']} × ${item['quantity']}"),
+                            subtitle: Text("${AppLocalizations.of(context)!.price}: \ ${AppLocalizations.of(context)!.sar} ${item['price']} × ${item['quantity']}"),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -285,7 +286,7 @@ double distance = 0.0; // متغير للمسافة
             ),
             const SizedBox(height: 16.0),
             Text(
-              "الإجمالي: \ر.س ${totalPrice.toStringAsFixed(2)}",
+              "${AppLocalizations.of(context)!.total}: \ ${AppLocalizations.of(context)!.sar} ${totalPrice.toStringAsFixed(2)}",
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 16.0),
@@ -311,12 +312,12 @@ double distance = 0.0; // متغير للمسافة
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text('خطأ'),
-                            content: const Text('لا يوجد مغسلة محددة.'),
+                            title: Text(AppLocalizations.of(context)!.error),
+                            content:  Text(AppLocalizations.of(context)!.thereisnospecificsink),
                             backgroundColor: primaryColor,
                             actions: <Widget>[
                               TextButton(
-                                child: const Text('موافق'),
+                                child:  Text(AppLocalizations.of(context)!.oK),
                                 onPressed: () => Navigator.pop(context),
                               ),
                             ],
@@ -325,7 +326,7 @@ double distance = 0.0; // متغير للمسافة
                       );
                     }
                   },
-                  child: const Text("متابعة إلى الدفع"),
+                  child: Text(AppLocalizations.of(context)!.continuetocheckout),
                 ),
 
           ],

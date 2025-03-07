@@ -1,54 +1,30 @@
-// For demo only
-import 'package:shop/constants.dart';
+import 'dart:convert';
 
 class ProductModel {
-  final String image, brandName, title;
-  final double price;
-  final double? priceAfetDiscount;
-  final int? dicountpercent;
+  final int id;
+  final String name;
+  final String? address;
+  final String? image;
+  final double? x_latitude;
+  final double? y_longitude;
 
   ProductModel({
-    required this.image,
-    required this.brandName,
-    required this.title,
-    required this.price,
-    this.priceAfetDiscount,
-    this.dicountpercent,
+    required this.id,
+    required this.name,
+    this.address,
+    this.image,
+    this.x_latitude,
+    this.y_longitude,
   });
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    return ProductModel(
+      id: json['id'],
+      name: utf8.decode(json['name'].codeUnits),
+      address: utf8.decode(json['address'].codeUnits),
+      image: json['image']?.isNotEmpty == true ? json['image'] : null,
+      x_latitude: json['x_map'] != "" ? double.parse(json['x_map'].toString()) : 0,
+      y_longitude: json['y_map'] != "" ? double.parse(json['y_map'].toString()) : 0,
+    );
+  }
 }
-
-List<ProductModel> demoFlashSaleProducts = [
-  ProductModel(
-    image: productDemoImg5,
-    title: "مغسلة العطاء",
-    brandName: "الرياض",
-    price: 650.62,
-    priceAfetDiscount: 390.36,
-    dicountpercent: 40,
-  ),
-];
-
-
-List<ProductModel> demoBestSellersProducts = [
-  ProductModel(
-    image: "https://i.imgur.com/aA8ST9l.jpeg",
-    title: "مغسلة الحياة",
-    brandName: "الرياض",
-    price: 650.62,
-    priceAfetDiscount: 390.36,
-    dicountpercent: 40,
-  ),
-];
-
-
-
-List<ProductModel> kidsProducts = [
-  ProductModel(
-    image: "https://i.imgur.com/aA8ST9l.jpeg",
-    title: "مغسلة الحياة",
-    brandName: "الرياض",
-    price: 650.62,
-    priceAfetDiscount: 590.36,
-    dicountpercent: 24,
-  ),
-];

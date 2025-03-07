@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'dart:convert'; // لاستخدام json.decode
 import 'package:shop/constants.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/screen_export.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 
@@ -191,8 +192,8 @@ class _EntryPointState extends State<EntryPoint> {
                       opacity: activeStep >= 0 ? 1 : 0.3,
                       child: Icon(Icons.watch_later, size: 20), // أيقونة pending
                     ),
-                    customTitle: const Text(
-                      'المعالجة',
+                    customTitle:  Text(
+                      AppLocalizations.of(context)?.processing ?? 'المعالجة',
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -202,8 +203,9 @@ class _EntryPointState extends State<EntryPoint> {
                       opacity: activeStep >= 1 ? 1 : 0.3,
                       child: Icon(Icons.local_shipping, size: 20), // أيقونة المندوب في الطريق
                     ),
-                    customTitle: const Text(
-                      'المندوب',
+                    customTitle: Text(
+                          AppLocalizations.of(context)?.delegates ?? 'المندوب',
+
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -213,8 +215,8 @@ class _EntryPointState extends State<EntryPoint> {
                       opacity: activeStep >= 2 ? 1 : 0.3,
                       child: Icon(Icons.check_circle, size: 20), // تم أخذها من العميل
                     ),
-                    customTitle: const Text(
-                      'مستلم',
+                    customTitle: Text(
+                      AppLocalizations.of(context)?.recipient ?? 'مستلم',
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -224,8 +226,8 @@ class _EntryPointState extends State<EntryPoint> {
                       opacity: activeStep >= 3 ? 1 : 0.3,
                       child: Icon(Icons.local_laundry_service, size: 20), // المغسلة استلمت الطلب
                     ),
-                    customTitle: const Text(
-                      'المغسلة',
+                    customTitle:  Text(
+                      AppLocalizations.of(context)?.laundry ?? 'المغسلة',
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -259,22 +261,22 @@ class _EntryPointState extends State<EntryPoint> {
             BottomNavigationBarItem(
               icon: svgIcon("assets/icons/Shop.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Shop.svg", color: const Color.fromARGB(255, 255, 255, 255)),
-              label: "الرئيسي",
+              label: AppLocalizations.of(context)!.home,
             ),
             BottomNavigationBarItem(
               icon: svgIcon("assets/icons/Category.svg",color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Category.svg", color: const Color.fromARGB(255, 255, 255, 255)),
-              label: "الطلبات",
+              label: AppLocalizations.of(context)!.orders,
             ),
             BottomNavigationBarItem(
               icon: svgIcon("assets/icons/Bookmark.svg",color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Bookmark.svg", color: const Color.fromARGB(255, 255, 255, 255)),
-              label: "المحفوظات",
+              label:AppLocalizations.of(context)!.bookmarks,
             ),
             BottomNavigationBarItem(
               icon: svgIcon("assets/icons/Profile.svg",color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Profile.svg", color: const Color.fromARGB(255, 255, 255, 255)),
-              label: "ملفي",
+              label: AppLocalizations.of(context)!.profile,
             ),
           ],
         ),

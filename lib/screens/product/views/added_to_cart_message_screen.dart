@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shop/constants.dart';
-import 'package:shop/screens/checkout/views/review_order.dart';
+import 'package:shop/screens/checkout/views/cart_screen.dart';
 
 class AddedToCartMessageScreen extends StatelessWidget {
   final int laundryId;  // تحديد النوع كـ final لضمان أنه لا يتغير بعد تمريره
@@ -45,6 +45,26 @@ class AddedToCartMessageScreen extends StatelessWidget {
                   Navigator.pop(context); // إغلاق الـ BottomSheet المفتوح
                 },
                 child: const Text("مواصلة"),
+              ),
+              const SizedBox(height: defaultPadding),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
+                onPressed: () {
+                  // منطق إنهاء الطلب
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CartScreen(),
+                      settings: RouteSettings(
+                        arguments: {
+                          'id': laundryId, // تمرير الـ id هنا
+                          // إذا كان لديك متغيرات أخرى مثل distance و duration، تأكد من تعريفها في الكلاس
+                        },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text("إنهاء الطلب"),
               ),
               const SizedBox(height: defaultPadding),
               const Spacer(),

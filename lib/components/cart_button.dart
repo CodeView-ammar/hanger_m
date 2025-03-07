@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop/l10n/app_localizations.dart';
 
 import '../constants.dart';
 
@@ -45,14 +46,14 @@ class CartButton extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "\ر.س ${price.toStringAsFixed(2)}",
+                            "\ ${AppLocalizations.of(context)!.sar} ${price.toStringAsFixed(2)}",
                             style: Theme.of(context)
                                 .textTheme
                                 .titleSmall!
                                 .copyWith(color: Colors.white),
                           ),
                           Text(
-                            subTitle,
+                            AppLocalizations.of(context)!.unitprice,
                             style: const TextStyle(
                                 color: Colors.white54,
                                 fontWeight: FontWeight.w500),
@@ -68,7 +69,7 @@ class CartButton extends StatelessWidget {
                       height: double.infinity,
                       color: Colors.black.withOpacity(0.15),
                       child: Text(
-                        title,
+                        AppLocalizations.of(context)!.ordernow,
                         style: Theme.of(context)
                             .textTheme
                             .titleSmall!

@@ -33,7 +33,7 @@ class WalletBalanceCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Your current balance",
+                    "رصيدك الحالي",
                     style: TextStyle(
                         color: whileColor80,
                         fontWeight: FontWeight.w500,
@@ -41,7 +41,7 @@ class WalletBalanceCard extends StatelessWidget {
                   ),
                   const SizedBox(height: defaultPadding / 2),
                   Text(
-                    "\$${balance.toStringAsFixed(2)}",
+                    "\ر س${balance.toStringAsFixed(2)}",
                     style: Theme.of(context)
                         .textTheme
                         .headlineSmall!
@@ -54,7 +54,7 @@ class WalletBalanceCard extends StatelessWidget {
           ElevatedButton(
             onPressed: onTabChargeBalance,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF9581FF),
+              backgroundColor: primaryColor,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(defaultBorderRadious),
@@ -62,7 +62,7 @@ class WalletBalanceCard extends StatelessWidget {
                 ),
               ),
             ),
-            child: const Text("+ Charge Balance"),
+            child: const Text("شحن رصيد"),
           )
         ],
       ),

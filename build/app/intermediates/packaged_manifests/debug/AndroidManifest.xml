@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.hanger_m"
+    package="com.hangerapp.hanger_m"
     android:versionCode="1"
     android:versionName="1.0.0" >
 
@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <queries>
         <intent>
@@ -29,18 +30,19 @@
         </intent>
         <!-- Needs to be explicitly declared on Android R+ -->
         <package android:name="com.google.android.apps.maps" />
-    </queries> <!-- Include required permissions for Google Maps API to run. -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    </queries>
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
 
     <permission
-        android:name="com.example.hanger_m.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+        android:name="com.hangerapp.hanger_m.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.example.hanger_m.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+    <uses-permission android:name="com.hangerapp.hanger_m.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 
     <application
         android:name="android.app.Application"
@@ -48,8 +50,8 @@
         android:debuggable="true"
         android:enableOnBackInvokedCallback="true"
         android:extractNativeLibs="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="معلاق" > <!-- Enable OnBackInvokedCallback -->
+        android:icon="@mipmap/launcher_icon"
+        android:label="@string/app_name" > <!-- Enable OnBackInvokedCallback -->
         <activity
             android:name="com.example.hanger_m.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -79,7 +81,7 @@
 
         <provider
             android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
-            android:authorities="com.example.hanger_m.flutter.image_provider"
+            android:authorities="com.hangerapp.hanger_m.flutter.image_provider"
             android:exported="false"
             android:grantUriPermissions="true" >
             <meta-data
@@ -154,7 +156,7 @@
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="com.example.hanger_m.androidx-startup"
+            android:authorities="com.hangerapp.hanger_m.androidx-startup"
             android:exported="false" >
             <meta-data
                 android:name="androidx.lifecycle.ProcessLifecycleInitializer"

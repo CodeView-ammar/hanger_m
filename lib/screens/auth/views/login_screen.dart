@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shop/components/api_extintion/otp_api.dart';
 import 'package:shop/constants.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/screens/auth/views/otp_screen.dart';
 import 'package:shop/screens/auth/views/privacy_policy.dart'; // استيراد شاشة سياسة الخصوصية
 import 'components/login_form.dart';
@@ -35,12 +36,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "مرحبا بعودتك",
+                    AppLocalizations.of(context)!.login, // استدعاء النص المترجم
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: defaultPadding / 2),
-                  const Text(
-                    "تسجيل الدخول بإستخدام رقم الهاتف",
+                  Text(
+                    AppLocalizations.of(context)!.loginWithPhone,
                   ),
                   const SizedBox(height: defaultPadding),
                   LogInForm(
@@ -60,8 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           });
                         },
                       ),
-                      const Text(
-                        "أوافق على ",
+                      Text(
+                        AppLocalizations.of(context)!.agreementMessage,
                         style: TextStyle(fontSize: 16),
                       ),
                       GestureDetector(
@@ -74,8 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           );
                         },
-                        child: const Text(
-                          "سياسة الخصوصية",
+                        child:  Text(
+                          AppLocalizations.of(context)!.privacypolicy,
                           style: TextStyle(
                             fontSize: 16,
                             color: primaryColor,
@@ -115,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             }
                           }
                         : null, // تعطيل الزر إذا لم يتم الموافقة
-                    child: const Text("تسجيل الدخول"),
+                    child:  Text(AppLocalizations.of(context)!.login),
                   ),
                 ],
               ),
@@ -136,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Text(message),
           actions: [
             TextButton(
-              child: const Text('موافق'),
+              child:  Text(AppLocalizations.of(context)!.oK),
               onPressed: () {
                 Navigator.of(context).pop();
               },

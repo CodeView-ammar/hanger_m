@@ -1,41 +1,45 @@
-import 'dart:async';
-import 'dart:math';
+
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shop/components/api_extintion/url_api.dart';
+
 
 class LocationService {
-  // دالة لحفظ الإحداثيات
-  Future<void> saveLocation(double latitude, double longitude) async {
+  Future<Map<String, dynamic>?> getDistanceAndDuration(double startLat, double startLng, double destLat, double destLng) async {
+    final apiKey = APIConfig.apiMap; // استبدل بـ API Key الخاص بك
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/directions/json?origin=$startLat,$startLng&destination=$destLat,$destLng&key=$apiKey',
+    );
+
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['routes'].isNotEmpty) {
+        final distance = data['routes'][0]['legs'][0]['distance']['value'] as int; // المسافة بالمتر
+        final duration = data['routes'][0]['legs'][0]['duration']['text']; // الوقت المستغرق
+        return {
+          'distance': distance / 1000, // تحويل إلى كيلومترات
+          'duration': duration,
+        };
+      }
+    } else {
+      throw Exception('فشل تحميل المسافة والوقت');
+    }
+
+    return null;
+  }
+
+  Future<Map<String, double?>> getCurrentLocation() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('latitude', latitude);
-    await prefs.setDouble('longitude', longitude);
+    // جلب الموقع المحفوظ في SharedPreferences
+    double? savedLatitude = prefs.getDouble('latitude');
+    double? savedLongitude = prefs.getDouble('longitude');
+    return {
+      'latitude': savedLatitude,
+      'longitude': savedLongitude,
+    };
   }
 
-  // دالة لحساب المسافة بين نقطتين
-  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const earthRadius = 6371; // نصف قطر الأرض بالكيلومترات
- 
-    // تحويل الدرجات إلى راديان
-    double dLat = _toRadians(lat2 - lat1);
-    double dLon = _toRadians(lon2 - lon1);
-
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-               cos(_toRadians(lat1)) * cos(_toRadians(lat2)) *
-               sin(dLon / 2) * sin(dLon / 2);
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-
-    return earthRadius * c; // المسافة بالكيلومترات
-  }
-
-  // دالة لتحويل الدرجات إلى راديان
-  double _toRadians(double degree) {
-    return degree * pi / 180;
-  }
-
-  // دالة لجلب الإحداثيات من SharedPreferences
-  Future<Map<String, double?>> getSavedLocation() async {
-    final prefs = await SharedPreferences.getInstance();
-    double? latitude = prefs.getDouble('latitude');
-    double? longitude = prefs.getDouble('longitude');
-    return {'latitude': latitude, 'longitude': longitude};
-  }
 }

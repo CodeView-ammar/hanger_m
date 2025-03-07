@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:shop/l10n/app_localizations.dart';
 import '../../../../constants.dart';
 
 class OnbordingContent extends StatelessWidget {
@@ -35,10 +35,9 @@ class OnbordingContent extends StatelessWidget {
         ),
         if (!isTextOnTop) const Spacer(),
         if (!isTextOnTop)
-          const OnbordTitleDescription(
-            title: "ابحث عن المغاسل \n التي بالقرب منك",
-            description:
-                "هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك.",
+          OnbordTitleDescription(
+            title: AppLocalizations.of(context)!.searchLaundriesText,
+            description: AppLocalizations.of(context)!.findLaundriesNearbyDescription,
           ),
 
         const Spacer(),

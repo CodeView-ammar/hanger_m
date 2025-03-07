@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/constants.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shop/screens/checkout/views/delegate_note.dart';
 import 'package:shop/screens/checkout/views/payment_method.dart';
@@ -64,7 +65,6 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
       }
     });
   }
-
   Future<String?> fetchPricePerKg() async {
     final response = await http.get(Uri.parse(APIConfig.deliverysettingEndpoint));
 
@@ -98,7 +98,7 @@ Future<void> fetchDefaultPaymentMethod() async {
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       setState(() {
-        String payment = responseData['payment_method'] ?? 'COD'; // تعيين COD كقيمة افتراضية
+        String payment = responseData['payment_method']?? ''; // تعيين COD كقيمة افتراضية
         switch (payment) {
           case "الدفع عند الاستلام":
             defaultPaymentMethod = "COD";
@@ -115,6 +115,7 @@ Future<void> fetchDefaultPaymentMethod() async {
         if (widget.isPaid) {
           defaultPaymentMethod = "CARD"; // تأكيد الدفع إذا كان مدفوعًا مسبقًا
         }
+      
       });
     } else {
       print('Error: ${response.body}');
@@ -124,21 +125,45 @@ Future<void> fetchDefaultPaymentMethod() async {
     }
   }
 
+void _showPaymentMethodDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('طريقة الدفع مطلوبة'),
+        content: const Text('يرجى اختيار طريقة الدفع قبل متابعة الطلب.'),
+        actions: <Widget>[
+          TextButton(
+            child: Text(AppLocalizations.of(context)!.oK),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Future<void> submitOrder() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userid');
-
+    // fetchDefaultPaymentMethod();
     if (userId == null) {
       print("لا يوجد معرف للمستخدم.");
       return;
     }
-
+    print(defaultPaymentMethod);
     // Update payment method
-    if (defaultPaymentMethod == "الدفع عند الاستلام") defaultPaymentMethod = "COD";
-    if (defaultPaymentMethod == "تم الدفع باستخدام البطاقة") defaultPaymentMethod = "CARD";
+    if (defaultPaymentMethod == "COD") defaultPaymentMethod = "COD";
+    if (defaultPaymentMethod == "CARD") defaultPaymentMethod = "CARD";
     if (defaultPaymentMethod == "الدفع باستخدام STC") defaultPaymentMethod = "STC";
-
+    // Check if payment method is selected
+    if (defaultPaymentMethod == null) {
+      // Display a message to the user
+      _showPaymentMethodDialog();
+      return; // Exit the function if no payment method is selected
+    }
     try {
 
       final response = await http.post(
@@ -148,8 +173,9 @@ Future<void> fetchDefaultPaymentMethod() async {
               'laundryId': widget.laundryId,
               'userId': userId,
               'delegateNote': delegateNote,
-              'paymentMethod': defaultPaymentMethod != null ? 'COD' : 'CARD', // Adjust as needed
+              'paymentMethod': defaultPaymentMethod, // Adjust as needed
               'isPaid': widget.isPaid,
+              'totalAmount':totalAmount
             }),
           );
 
@@ -163,7 +189,7 @@ Future<void> fetchDefaultPaymentMethod() async {
               content: const Text('تم إرسال طلبك بنجاح إلى المغسلة.'),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('موافق'),
+                  child:  Text(AppLocalizations.of(context)!.oK),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.pushNamedAndRemoveUntil(
@@ -234,9 +260,10 @@ Future<void> fetchDefaultPaymentMethod() async {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('مراجعة الطلب'),
+        title:  Text(AppLocalizations.of(context)!.reviewrequest),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -244,8 +271,8 @@ Future<void> fetchDefaultPaymentMethod() async {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'تفاصيل التوصيل',
+               Text(
+                AppLocalizations.of(context)!.deliverydetails,
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -468,11 +495,14 @@ Future<void> fetchDefaultPaymentMethod() async {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text(
-                      defaultPaymentMethod ?? 'جاري تحميل طريقة الدفع...',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                  ],
+                      Text(
+                        defaultPaymentMethod == "CARD" 
+                          ? 'تم الدفع باستخدام البطاقة' 
+                          : (defaultPaymentMethod == null ) 
+                              ? 'يجب عليك تحديد طريقة الدفع' 
+                              : 'الدفع عند الاستلام',
+                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      )                  ],
                 ),
               ),
               const SizedBox(height: 24),

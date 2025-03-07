@@ -41,10 +41,27 @@
 	<string>We need your location to provide better service.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>We need your permission to send notifications.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+	<string>fetch</string>
+	<string>remote-notification</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+	<key>NSAllowsArbitraryLoads</key>
+	<true/>
+	</dict>
+
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CFBundleLocalizations</key>
+	<array>
+	<string>ar</string>
+	<string>en</string>
+	<string>es</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

@@ -46,20 +46,7 @@ class WalletScreen extends StatelessWidget {
                       date: "JUN 12, 2020",
                       amount: 129,
                       products: [
-                        ProductModel(
-                          image: productDemoImg1,
-                          title: "مستودع الجبل للنساء",
-                          brandName: "ليبسي لندن",
-                          price: 540,
-                          priceAfetDiscount: 420,
-                          dicountpercent: 20,
-                        ),
-                        ProductModel(
-                          image: productDemoImg4,
-                          title: "مستودع ماونتن بيتا",
-                          brandName: "ليبسي لندن",
-                          price: 800,
-                        ),
+                        
                       ],
                     ),
                   ),

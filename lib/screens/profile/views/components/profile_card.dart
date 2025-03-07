@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/network_image_with_loader.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/screens/auth/views/login_screen.dart';
 import 'package:shop/screens/profile/views/profile_screen.dart';
 
@@ -84,7 +85,7 @@ class _ProfileCardState extends State<ProfileCard> {
       title: Row(
         children: [
           Text(
-            isLoggedIn ? "هلا, ${widget.name}" : "تسجيل الدخول", // إظهار "هلا" أو "تسجيل الدخول"
+            isLoggedIn ? "هلا, ${widget.name}" : AppLocalizations.of(context)!.login, // إظهار "هلا" أو "تسجيل الدخول"
             style: const TextStyle(fontWeight: FontWeight.w500),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -121,7 +122,7 @@ class _ProfileCardState extends State<ProfileCard> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                "رقم الجوال: $phoneNumber",
+                "${AppLocalizations.of(context)!.numberphone}: $phoneNumber",
                 style: TextStyle(
                   color: Colors.blue.shade800,
                   fontWeight: FontWeight.w500,
@@ -138,7 +139,7 @@ class _ProfileCardState extends State<ProfileCard> {
                 ),
               ),
               child: Text(
-                "تسجيل الدخول",
+                AppLocalizations.of(context)!.login,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
