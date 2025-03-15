@@ -10,6 +10,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skip => 'Skip';
 
   @override
+  String get welcomeapp => 'Welcome to the Muallaq app';
+
+  @override
+  String get welcomeapp_detils => 'Through the application, you can book and deliver clothes from the laundromat to your home.';
+
+  @override
   String get search_laundries => 'Search for laundries near you';
 
   @override
@@ -128,6 +134,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customize => 'Customize';
+
+  @override
+  String get languagechange => 'language change';
+
+  @override
+  String get search => 'search';
 
   @override
   String get notifications => 'Notifications';

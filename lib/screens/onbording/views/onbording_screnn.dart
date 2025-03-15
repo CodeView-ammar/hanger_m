@@ -22,6 +22,12 @@ class _OnBordingScreenState extends State<OnBordingScreen> {
   int _pageIndex = 0;
   final List<Onbord> _onbordData = [
     Onbord(
+      image: "assets/images/logo_white.png",
+      imageDarkTheme: "assets/images/logo_white.png",
+      title:"welcomeapp",
+      description:"welcomeapp_detils",
+    ),
+    Onbord(
       image: "assets/Illustration/Illustration-0.png",
       imageDarkTheme: "assets/Illustration/Illustration-0.png",
       title:"search_laundries",
@@ -81,6 +87,8 @@ class _OnBordingScreenState extends State<OnBordingScreen> {
     final localizations = AppLocalizations.of(context);
     final translations = {
       'skip': localizations?.skip,
+      "welcomeapp": localizations?.welcomeapp,
+      "welcomeapp_detils": localizations?.welcomeapp_detils,
       'search_laundries': localizations?.search_laundries,
       'find_laundries_nearby': localizations?.find_laundries_nearby,
       'choose_laundry_and_clothes': localizations?.choose_laundry_and_clothes,

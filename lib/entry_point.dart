@@ -8,6 +8,7 @@ import 'package:shop/components/api_extintion/url_api.dart';
 import 'dart:convert'; // لاستخدام json.decode
 import 'package:shop/constants.dart';
 import 'package:shop/l10n/app_localizations.dart';
+import 'package:shop/l10n/language_helper.dart';
 import 'package:shop/route/screen_export.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 
@@ -26,16 +27,15 @@ class _EntryPointState extends State<EntryPoint> {
     ProfileScreen(),
   ];
 
-
   int _currentIndex = 0;
   int activeStep = 0;
   Timer? _timer;
-
+  String? _logoPath;
   @override
   void initState() {
     super.initState();
     _startFetchingOrderStatus(); // بدء العملية لجلب حالة الطلب
-  
+  _loadLogo(); // تحميل اللوجو
   }
 
   @override
@@ -57,32 +57,25 @@ class _EntryPointState extends State<EntryPoint> {
     if (userId == null) {
       // Navigator.pushNamed(context, logInScreenRoute);
       return;
-    }else{
-    final response = await http.get(Uri.parse('${APIConfig.orderstatusUrl}?user=$userId'));
+    } else {
+      final response = await http.get(Uri.parse('${APIConfig.orderstatusUrl}?user=$userId'));
 
-    if (response.statusCode == 200) {
-      // افترض أن الاستجابة هي JSON تحتوي على حالة الطلب
-      final data = json.decode(response.body);
-      
-      // استخدام المفتاح الصحيح
-      String? orderStatus = data['order_status']; // الحالة القادمة من الـ API
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        String? orderStatus = data['order_status']; // الحالة القادمة من الـ API
 
-      // تحقق من أن orderStatus ليست null
-      if (orderStatus != null) {
-        // تحويل حالة الطلب إلى الرقم المناسب للـ EasyStepper
-        int step = _getStepForStatus(orderStatus);
-
-        setState(() {
-          activeStep = step; // تحديث الحالة بناءً على الاستجابة
-        });
-      } else {
-        print("حالة الطلب غير متاحة");
+        if (orderStatus != null) {
+          int step = _getStepForStatus(orderStatus);
+          setState(() {
+            activeStep = step; // تحديث الحالة بناءً على الاستجابة
+          });
+        } else {
+          print("حالة الطلب غير متاحة");
+        }
       }
-    } 
     }
   }
 
-  // تعديل الدالة لتشمل الحالات الجديدة
   int _getStepForStatus(String status) {
     switch (status) {
       case 'pending':
@@ -97,13 +90,10 @@ class _EntryPointState extends State<EntryPoint> {
         return 0; // حالة افتراضية
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
     SvgPicture svgIcon(String src, {Color? color}) {
       return SvgPicture.asset(
         src,
-        height: 24, // تصغير حجم الأيقونات
+        height: 24,
         colorFilter: ColorFilter.mode(
             color ?? Theme.of(context).iconTheme.color!.withOpacity(
                 Theme.of(context).brightness == Brightness.light ? 0.3 : 1),
@@ -111,27 +101,34 @@ class _EntryPointState extends State<EntryPoint> {
       );
     }
 
+  Future<void> _loadLogo() async {
+    String currentLanguage = await LanguageHelper.getCurrentLanguage() ?? 'ar';
+    setState(() {
+      _logoPath = currentLanguage == 'ar'
+          ? 'assets/logo/logo_arabic.svg'
+          : 'assets/logo/logo_english.svg';
+    });
+  }
+  @override
+  Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: const SizedBox(),
         centerTitle: false,
-        title: SvgPicture.asset(
-          "assets/logo/logo.svg",
-          colorFilter: ColorFilter.mode(
-              Theme.of(context).iconTheme.color!, BlendMode.srcIn),
-          height: 20,
-          width: 100,
-        ),
+        title: _logoPath == null
+            ? const CircularProgressIndicator()
+            : SvgPicture.asset(
+                _logoPath!,
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).iconTheme.color!,
+                  BlendMode.srcIn,
+                ),
+                height: 20,
+                width: 100,
+              ),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     setState(() {
-          //       _currentIndex = 1;
-          //     });
-          //   },
-          //   icon: svgIcon("assets/icons/Search.svg"),
-          // ),
           IconButton(
             onPressed: () {
               Navigator.pushNamed(context, addressesScreenRoute);
@@ -145,7 +142,7 @@ class _EntryPointState extends State<EntryPoint> {
             icon: svgIcon("assets/icons/Notification.svg"),
           ),
         ],
-      ),
+      ),      
       body: Column(
         children: [
           Expanded(
@@ -165,14 +162,12 @@ class _EntryPointState extends State<EntryPoint> {
               ],
             ),
           ),
-          // إخفاء حالة الطلب إذا كانت 0
           if (activeStep != 0)
             Container(
               padding: const EdgeInsets.only(top: defaultPadding / 2),
               color: Theme.of(context).brightness == Brightness.light
                   ? Colors.white
                   : const Color(0xFF101015),
-                
               child: EasyStepper(
                 onStepReached: null,
                 activeStep: activeStep,
@@ -190,9 +185,9 @@ class _EntryPointState extends State<EntryPoint> {
                     customStep: AnimatedOpacity(
                       duration: Duration(milliseconds: 300),
                       opacity: activeStep >= 0 ? 1 : 0.3,
-                      child: Icon(Icons.watch_later, size: 20), // أيقونة pending
+                      child: Icon(Icons.watch_later, size: 20),
                     ),
-                    customTitle:  Text(
+                    customTitle: Text(
                       AppLocalizations.of(context)?.processing ?? 'المعالجة',
                       textAlign: TextAlign.center,
                     ),
@@ -201,11 +196,10 @@ class _EntryPointState extends State<EntryPoint> {
                     customStep: AnimatedOpacity(
                       duration: Duration(milliseconds: 300),
                       opacity: activeStep >= 1 ? 1 : 0.3,
-                      child: Icon(Icons.local_shipping, size: 20), // أيقونة المندوب في الطريق
+                      child: Icon(Icons.local_shipping, size: 20),
                     ),
                     customTitle: Text(
-                          AppLocalizations.of(context)?.delegates ?? 'المندوب',
-
+                      AppLocalizations.of(context)?.delegates ?? 'المندوب',
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -213,7 +207,7 @@ class _EntryPointState extends State<EntryPoint> {
                     customStep: AnimatedOpacity(
                       duration: Duration(milliseconds: 300),
                       opacity: activeStep >= 2 ? 1 : 0.3,
-                      child: Icon(Icons.check_circle, size: 20), // تم أخذها من العميل
+                      child: Icon(Icons.check_circle, size: 20),
                     ),
                     customTitle: Text(
                       AppLocalizations.of(context)?.recipient ?? 'مستلم',
@@ -224,9 +218,9 @@ class _EntryPointState extends State<EntryPoint> {
                     customStep: AnimatedOpacity(
                       duration: Duration(milliseconds: 300),
                       opacity: activeStep >= 3 ? 1 : 0.3,
-                      child: Icon(Icons.local_laundry_service, size: 20), // المغسلة استلمت الطلب
+                      child: Icon(Icons.local_laundry_service, size: 20),
                     ),
-                    customTitle:  Text(
+                    customTitle: Text(
                       AppLocalizations.of(context)?.laundry ?? 'المغسلة',
                       textAlign: TextAlign.center,
                     ),
@@ -264,17 +258,17 @@ class _EntryPointState extends State<EntryPoint> {
               label: AppLocalizations.of(context)!.home,
             ),
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Category.svg",color: const Color.fromARGB(255, 255, 255, 255)),
+              icon: svgIcon("assets/icons/Category.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Category.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               label: AppLocalizations.of(context)!.orders,
             ),
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Bookmark.svg",color: const Color.fromARGB(255, 255, 255, 255)),
+              icon: svgIcon("assets/icons/Bookmark.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Bookmark.svg", color: const Color.fromARGB(255, 255, 255, 255)),
-              label:AppLocalizations.of(context)!.bookmarks,
+              label: AppLocalizations.of(context)!.bookmarks,
             ),
             BottomNavigationBarItem(
-              icon: svgIcon("assets/icons/Profile.svg",color: const Color.fromARGB(255, 255, 255, 255)),
+              icon: svgIcon("assets/icons/Profile.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               activeIcon: svgIcon("assets/icons/Profile.svg", color: const Color.fromARGB(255, 255, 255, 255)),
               label: AppLocalizations.of(context)!.profile,
             ),

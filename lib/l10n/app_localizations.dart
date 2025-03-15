@@ -101,6 +101,18 @@ abstract class AppLocalizations {
   /// **'Skip'**
   String get skip;
 
+  /// No description provided for @welcomeapp.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to the Muallaq app'**
+  String get welcomeapp;
+
+  /// No description provided for @welcomeapp_detils.
+  ///
+  /// In en, this message translates to:
+  /// **'Through the application, you can book and deliver clothes from the laundromat to your home.'**
+  String get welcomeapp_detils;
+
   /// No description provided for @search_laundries.
   ///
   /// In en, this message translates to:
@@ -340,6 +352,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Customize'**
   String get customize;
+
+  /// No description provided for @languagechange.
+  ///
+  /// In en, this message translates to:
+  /// **'language change'**
+  String get languagechange;
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'search'**
+  String get search;
 
   /// No description provided for @notifications.
   ///

@@ -1,6 +1,8 @@
 {
   "@@locale": "en",
   "skip": "Skip",
+  "welcomeapp":"Welcome to the Muallaq app",
+  "welcomeapp_detils":"Through the application, you can book and deliver clothes from the laundromat to your home.",
   "search_laundries": "Search for laundries near you",
   "find_laundries_nearby": "Here you will find all laundries with their specific categories and know the nearest laundry to you.",
   "choose_laundry_and_clothes": "Choose the laundry and select the types of clothes you want to wash and put them in the basket.",
@@ -42,6 +44,8 @@
   "address":"address",
   "wallet":"wallet",
   "customize":"Customize",
+  "languagechange":"language change",
+  "search":"search",
   "notifications":"Notifications",
   "settings":"Settings",
   "location":"location",

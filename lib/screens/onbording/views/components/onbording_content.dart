@@ -36,8 +36,8 @@ class OnbordingContent extends StatelessWidget {
         if (!isTextOnTop) const Spacer(),
         if (!isTextOnTop)
           OnbordTitleDescription(
-            title: AppLocalizations.of(context)!.searchLaundriesText,
-            description: AppLocalizations.of(context)!.findLaundriesNearbyDescription,
+            title: AppLocalizations.of(context)!.welcomeapp,
+            description: AppLocalizations.of(context)!.welcomeapp_detils,
           ),
 
         const Spacer(),

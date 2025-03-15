@@ -152,7 +152,7 @@ Future<void> _refreshProducts() async {
                       _refreshProducts();  // تحديث القائمة مباشرة عند البحث
                     },
                     decoration: InputDecoration(
-                      hintText: "بحث",
+                      hintText: AppLocalizations.of(context)!.search,
                       prefixIcon: Icon(Icons.search),
                     ),
                   ),

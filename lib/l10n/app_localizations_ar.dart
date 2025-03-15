@@ -10,6 +10,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get skip => 'تخطي';
 
   @override
+  String get welcomeapp => 'مرحبا بك في تطبيق معلاق';
+
+  @override
+  String get welcomeapp_detils => 'تستطيع من خلال الطبيق حجز وتوصيل الملابس من المغاسل وإلى المنزل';
+
+  @override
   String get search_laundries => 'ابحث عن المغاسل التي بالقرب منك';
 
   @override
@@ -128,6 +134,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get customize => 'تخصيص';
+
+  @override
+  String get languagechange => 'تغيير الغة';
+
+  @override
+  String get search => 'بحث';
 
   @override
   String get notifications => 'الإشعارات';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shop/entry_point.dart';
 import 'package:shop/screens/help/views/instructions_screen.dart';
+import 'package:shop/screens/onbording/splish_screen.dart';
 import 'package:shop/screens/onbording/sub_main.dart';
 import 'package:shop/screens/user_info/views/edit_user_info_screen.dart';
 
@@ -200,10 +201,10 @@ case productReviewsScreenRoute:
       return MaterialPageRoute(
         builder: (context) => const SearchScreen(),
       );
-    // case searchHistoryScreenRoute:
-    //   return MaterialPageRoute(
-    //     builder: (context) => const SearchHistoryScreen(),
-    //   );
+    case SplashScreenRoute:
+      return MaterialPageRoute(
+        builder: (context) => SplashScreen(),
+      );
     case bookmarkScreenRoute:
       return MaterialPageRoute(
         builder: (context) => const BookmarkScreen(),

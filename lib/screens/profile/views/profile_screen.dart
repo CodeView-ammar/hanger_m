@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop/components/list_tile/divider_list_tile.dart';
 import 'package:shop/constants.dart';
 import 'package:shop/l10n/app_localizations.dart';
+import 'package:shop/l10n/language_helper.dart';
+import 'package:shop/main.dart';
 import 'package:shop/route/screen_export.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,14 +20,23 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Future<bool> checkNotificationPermission() async {
-    // هنا يمكنك استخدام مكتبة للتحقق من صلاحيات الإشعارات
-    // على سبيل المثال، إذا كنت تستخدم firebase_messaging:
-    // final Messaging messaging = FirebaseMessaging.instance;
-    // NotificationSettings settings = await messaging.requestPermission();
-    // return settings.authorizationStatus == AuthorizationStatus.authorized;
+    // هنا يمكن استخدام مكتبة للتحقق من صلاحيات الإشعارات
+    return Future.value(true); // مثال على إرجاع قيمة ثابتة
+  }
 
-    // في هذا المثال، سنقوم بإرجاع قيمة عشوائية (تغييرها بناءً على منطقك):
-    return Future.value(true); // أو false حسب الحاجة
+  void changeLanguage(BuildContext context) async {
+    String? currentLanguage = await LanguageHelper.getCurrentLanguage();
+
+    // تحديد اللغة الجديدة بناءً على اللغة الحالية
+    String newLanguage = (currentLanguage == 'en') ? 'ar' : 'en';
+
+    // حفظ اللغة الجديدة في الكاش
+    await LanguageHelper.setLanguage(newLanguage);
+
+    // إعادة تشغيل التطبيق فقط إذا كانت الـ widget ما زالت موجودة في الـ tree
+    if (context.mounted) {
+      RestartWidget.restartApp(context);
+    }
   }
 
   @override
@@ -97,17 +108,37 @@ class ProfileScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: defaultPadding, vertical: defaultPadding / 2),
                         child: Text(
-                          AppLocalizations.of(context)!.customize,
+                          AppLocalizations.of(context)!.languagechange,
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                       ),
-                      DividerListTileWithTrilingText(
-                        svgSrc: "assets/icons/Notification.svg",
-                        title: AppLocalizations.of(context)!.notifications,
-                        trilingText: isNotificationEnabled ? "On" : "Off", // تغيير النص بناءً على الحالة
-                        press: () {
-                          Navigator.pushNamed(context, enableNotificationScreenRoute);
+                      TextButton(
+                        onPressed: () {
+                          changeLanguage(context);
                         },
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.language,  // أيقونة اللغة
+                              color: primaryColor, // لون الأيقونة
+                            ),
+                            const SizedBox(width: 8), // المسافة بين الأيقونة والكلمة
+                            FutureBuilder<String?>(
+                              future: LanguageHelper.getCurrentLanguage(),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState == ConnectionState.waiting) {
+                                  return const CircularProgressIndicator();
+                                } else {
+                                  String currentLanguage = snapshot.data ?? 'ar';
+                                  return Text(
+                                    currentLanguage == 'ar' ? 'الإنجليزية' : 'العربية',
+                                    style: const TextStyle(color: primaryColor),
+                                  );
+                                }
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: defaultPadding),
                       Padding(
@@ -179,7 +210,9 @@ class ProfileScreen extends StatelessWidget {
                           ),
                         ),
                         title: Text(
-                          userPhoneNumber.isEmpty ? AppLocalizations.of(context)!.login : AppLocalizations.of(context)!.logout,
+                          userPhoneNumber.isEmpty
+                              ? AppLocalizations.of(context)!.login
+                              : AppLocalizations.of(context)!.logout,
                           style: TextStyle(
                             color: userPhoneNumber.isEmpty ? Colors.green : errorColor,
                             fontSize: 14,
