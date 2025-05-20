@@ -25,25 +25,29 @@ com.example.hanger_m.app-lifecycle-runtime-2.7.0-23 C:\Users\Power Plus\.gradle\
 com.example.hanger_m.app-jetified-lifecycle-viewmodel-savedstate-2.7.0-24 C:\Users\Power Plus\.gradle\caches\transforms-3\ca2eed4266fd24517e583e6618aa3924\transformed\jetified-lifecycle-viewmodel-savedstate-2.7.0\res
 com.example.hanger_m.app-webkit-1.12.1-25 C:\Users\Power Plus\.gradle\caches\transforms-3\e41db09f4a417a719f3e0f2572503bbc\transformed\webkit-1.12.1\res
 com.example.hanger_m.app-jetified-play-services-auth-21.2.0-26 C:\Users\Power Plus\.gradle\caches\transforms-3\ec39de7e548a26ebad4f83300b88b05c\transformed\jetified-play-services-auth-21.2.0\res
-com.example.hanger_m.app-jetified-tracing-1.2.0-27 C:\Users\Power Plus\.gradle\caches\transforms-3\fee79d0d8ef3af5dbc14ef6d22d028cf\transformed\jetified-tracing-1.2.0\res
-com.example.hanger_m.app-debug-28 E:\hinger\hanger_m\android\app\src\debug\res
-com.example.hanger_m.app-main-29 E:\hinger\hanger_m\android\app\src\main\res
-com.example.hanger_m.app-pngs-30 E:\hinger\hanger_m\build\app\generated\res\pngs\debug
-com.example.hanger_m.app-resValues-31 E:\hinger\hanger_m\build\app\generated\res\resValues\debug
-com.example.hanger_m.app-packageDebugResources-32 E:\hinger\hanger_m\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
-com.example.hanger_m.app-packageDebugResources-33 E:\hinger\hanger_m\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
-com.example.hanger_m.app-merged_res-34 E:\hinger\hanger_m\build\app\intermediates\merged_res\debug
-com.example.hanger_m.app-packaged_res-35 E:\hinger\hanger_m\build\flutter_plugin_android_lifecycle\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-36 E:\hinger\hanger_m\build\geocoding_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-37 E:\hinger\hanger_m\build\geolocator_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-38 E:\hinger\hanger_m\build\google_maps_flutter_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-39 E:\hinger\hanger_m\build\image_picker_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-40 E:\hinger\hanger_m\build\location\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-41 E:\hinger\hanger_m\build\path_provider_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-42 E:\hinger\hanger_m\build\pay_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-43 E:\hinger\hanger_m\build\permission_handler_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-44 E:\hinger\hanger_m\build\shared_preferences_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-45 E:\hinger\hanger_m\build\sms_autofill\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-46 E:\hinger\hanger_m\build\sqflite_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-47 E:\hinger\hanger_m\build\url_launcher_android\intermediates\packaged_res\debug
-com.example.hanger_m.app-packaged_res-48 E:\hinger\hanger_m\build\webview_flutter_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-media-1.1.0-27 C:\Users\Power Plus\.gradle\caches\transforms-3\f3615c261f79a58e2f6398389ecca2f8\transformed\media-1.1.0\res
+com.example.hanger_m.app-jetified-tracing-1.2.0-28 C:\Users\Power Plus\.gradle\caches\transforms-3\fee79d0d8ef3af5dbc14ef6d22d028cf\transformed\jetified-tracing-1.2.0\res
+com.example.hanger_m.app-debug-29 E:\hinger\hanger_m\android\app\src\debug\res
+com.example.hanger_m.app-main-30 E:\hinger\hanger_m\android\app\src\main\res
+com.example.hanger_m.app-pngs-31 E:\hinger\hanger_m\build\app\generated\res\pngs\debug
+com.example.hanger_m.app-resValues-32 E:\hinger\hanger_m\build\app\generated\res\resValues\debug
+com.example.hanger_m.app-packageDebugResources-33 E:\hinger\hanger_m\build\app\intermediates\incremental\debug\packageDebugResources\merged.dir
+com.example.hanger_m.app-packageDebugResources-34 E:\hinger\hanger_m\build\app\intermediates\incremental\debug\packageDebugResources\stripped.dir
+com.example.hanger_m.app-merged_res-35 E:\hinger\hanger_m\build\app\intermediates\merged_res\debug
+com.example.hanger_m.app-packaged_res-36 E:\hinger\hanger_m\build\connectivity_plus\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-37 E:\hinger\hanger_m\build\flutter_local_notifications\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-38 E:\hinger\hanger_m\build\flutter_plugin_android_lifecycle\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-39 E:\hinger\hanger_m\build\geocoding_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-40 E:\hinger\hanger_m\build\geolocator_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-41 E:\hinger\hanger_m\build\google_maps_flutter_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-42 E:\hinger\hanger_m\build\image_picker_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-43 E:\hinger\hanger_m\build\location\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-44 E:\hinger\hanger_m\build\path_provider_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-45 E:\hinger\hanger_m\build\pay_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-46 E:\hinger\hanger_m\build\permission_handler_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-47 E:\hinger\hanger_m\build\restart_app\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-48 E:\hinger\hanger_m\build\shared_preferences_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-49 E:\hinger\hanger_m\build\sms_autofill\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-50 E:\hinger\hanger_m\build\sqflite_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-51 E:\hinger\hanger_m\build\url_launcher_android\intermediates\packaged_res\debug
+com.example.hanger_m.app-packaged_res-52 E:\hinger\hanger_m\build\webview_flutter_android\intermediates\packaged_res\debug

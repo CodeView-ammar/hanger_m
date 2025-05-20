@@ -121,6 +121,81 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logout => 'تسجيل الخروج';
 
   @override
+  String get paymentdetails => 'تفاصيل الدفع';
+
+  @override
+  String get notedelegate => 'ملاحظات المندوب';
+
+  @override
+  String get exampledont => 'مثال: لا تقوم بدق على الجرس.';
+
+  @override
+  String get minute => 'دقيقة';
+
+  @override
+  String get expecteddeliverytime => 'مدة التوصيل المتوقعة';
+
+  @override
+  String get choose => 'اختر';
+
+  @override
+  String get copmtut => 'اختر طريقة الدفع أونلاين لاستخدام الرصيد المتاح';
+
+  @override
+  String get paymentmethods => 'طرق الدفع';
+
+  @override
+  String get pmbc => 'تم الدفع باستخدام البطاقة';
+
+  @override
+  String get pur => 'الدفع عند الاستلام';
+
+  @override
+  String get ymsapm => 'يجب عليك تحديد طريقة الدفع';
+
+  @override
+  String get totaldemand => 'اجمالي الطلب';
+
+  @override
+  String get notpaid => 'لم يتم الدفع';
+
+  @override
+  String get paid => 'تم الدفع';
+
+  @override
+  String get subService => 'خدمات إضافية';
+
+  @override
+  String get submitrequest => 'إرسال الطلب';
+
+  @override
+  String get deliveryprice => 'سعر التوصيل';
+
+  @override
+  String get poloic => 'الدفع الإلكتروني لاحقا او نقدأ';
+
+  @override
+  String get piaopettaotrrto => 'ادفع نقدا او ادفع إلكترونيا من خلال التطبيق بمجرد ان يستلم المندوب الطلب';
+
+  @override
+  String get ptaspumn => 'ادفع لجهة معينة باستخدام رقم الجوال';
+
+  @override
+  String get aanc => 'إضافة بطاقة جديدة';
+
+  @override
+  String get yhnac => 'لا يوجد لديك بطاقات مضافة';
+
+  @override
+  String get yrhbss => 'تم إرسال الطلب بنجاح!';
+
+  @override
+  String get yohbssttl => 'تم إرسال طلبك بنجاح إلى المغسلة.';
+
+  @override
+  String get changing => 'تغيير';
+
+  @override
   String get account => 'الحساب';
 
   @override

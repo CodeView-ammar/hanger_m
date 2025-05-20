@@ -124,8 +124,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
+      
       setState(() {
-        _services = data.map((item) => ServiceModel.fromJson(item)).toList(); // تحديث القائمة مباشرة
+        _services = data.map((item) => ServiceModel.fromJson(item['service'])).toList(); // تحديث القائمة مباشرة
       });
     } else {
       throw Exception('المغسلة لا تمتلك خدمات');

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/screens/checkout/tools/add_card_screen.dart';
 import 'package:shop/screens/checkout/views/review_order.dart';
 
@@ -50,6 +51,7 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('تم إضافة طريقة الدفع بنجاح');
+        print(name);
         if(name=="COD"){
                Navigator.pushReplacement(
             context,
@@ -83,14 +85,14 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'طرق الدفع',
+             Text(
+              AppLocalizations.of(context)!.paymentmethods,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             if (totalAmount != null) 
               Text(
-                ' المبلغ الإجمالي: ${totalAmount!} ريال',
+                ' ${AppLocalizations.of(context)!.total}: ${totalAmount!} ${AppLocalizations.of(context)!.sar}',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
               ),
             const SizedBox(height: 16),
@@ -98,8 +100,8 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
               child: ListView(
                 children: [
                   PaymentOption(
-                    title: 'الدفع الإلكتروني لاحقا او نقدأ',
-                    subtitle: 'ادفع نقدا او ادفع إلكترونيا من خلال التطبيق بمجرد ان يستلم المندوب الطلب',
+                    title: AppLocalizations.of(context)!.poloic,
+                    subtitle:AppLocalizations.of(context)!.piaopettaotrrto,
                     logo: 'assets/icons/money_hand.jpg',
                     total: totalAmount ?? 0.0, // ضمان عدم تمرير null
                     onTap: () {
@@ -109,7 +111,7 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
                   const Divider(),
                   PaymentOption(
                     title: 'stc pay',
-                    subtitle: 'ادفع لجهة معينة باستخدام رقم الجوال',
+                    subtitle:  AppLocalizations.of(context)!.ptaspumn,
                     logo: 'assets/icons/stc_pay.png',
                     onTap: null, // الزر غير قابل للنقر
                     isReadOnly: true, // خاصية لجعل الزر للقراءة فقط
@@ -117,8 +119,8 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
                   ),
                   const Divider(),
                   PaymentOption(
-                    title: 'إضافة بطاقة جديدة',
-                    subtitle: 'لا يوجد لديك بطاقات مضافة',
+                    title:  AppLocalizations.of(context)!.aanc,
+                    subtitle:  AppLocalizations.of(context)!.yhnac,
                     logo: 'assets/icons/credit_card.png',
                     total: totalAmount ?? 0.0, // ضمان عدم تمرير null
                     onTap: () {

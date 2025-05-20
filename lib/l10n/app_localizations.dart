@@ -323,6 +323,156 @@ abstract class AppLocalizations {
   /// **'logout'**
   String get logout;
 
+  /// No description provided for @paymentdetails.
+  ///
+  /// In en, this message translates to:
+  /// **'payment details'**
+  String get paymentdetails;
+
+  /// No description provided for @notedelegate.
+  ///
+  /// In en, this message translates to:
+  /// **'Note to the delegate'**
+  String get notedelegate;
+
+  /// No description provided for @exampledont.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: Don\'t ring the bell.'**
+  String get exampledont;
+
+  /// No description provided for @minute.
+  ///
+  /// In en, this message translates to:
+  /// **'minute'**
+  String get minute;
+
+  /// No description provided for @expecteddeliverytime.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected delivery time'**
+  String get expecteddeliverytime;
+
+  /// No description provided for @choose.
+  ///
+  /// In en, this message translates to:
+  /// **'choose'**
+  String get choose;
+
+  /// No description provided for @copmtut.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an online payment method to use the available balance.'**
+  String get copmtut;
+
+  /// No description provided for @paymentmethods.
+  ///
+  /// In en, this message translates to:
+  /// **'payment methods'**
+  String get paymentmethods;
+
+  /// No description provided for @pmbc.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment made by card'**
+  String get pmbc;
+
+  /// No description provided for @pur.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment upon receipt'**
+  String get pur;
+
+  /// No description provided for @ymsapm.
+  ///
+  /// In en, this message translates to:
+  /// **'You must select a payment method.'**
+  String get ymsapm;
+
+  /// No description provided for @totaldemand.
+  ///
+  /// In en, this message translates to:
+  /// **'Total demand'**
+  String get totaldemand;
+
+  /// No description provided for @notpaid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not paid'**
+  String get notpaid;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'paid'**
+  String get paid;
+
+  /// No description provided for @subService.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional services'**
+  String get subService;
+
+  /// No description provided for @submitrequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit the request'**
+  String get submitrequest;
+
+  /// No description provided for @deliveryprice.
+  ///
+  /// In en, this message translates to:
+  /// **'Delivery price'**
+  String get deliveryprice;
+
+  /// No description provided for @poloic.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay online later or in cash'**
+  String get poloic;
+
+  /// No description provided for @piaopettaotrrto.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay in cash or pay electronically through the app once the representative receives the order.'**
+  String get piaopettaotrrto;
+
+  /// No description provided for @ptaspumn.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay to a specific party using a mobile number'**
+  String get ptaspumn;
+
+  /// No description provided for @aanc.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a new card'**
+  String get aanc;
+
+  /// No description provided for @yhnac.
+  ///
+  /// In en, this message translates to:
+  /// **'You have no added cards.'**
+  String get yhnac;
+
+  /// No description provided for @yrhbss.
+  ///
+  /// In en, this message translates to:
+  /// **'Your request has been sent successfully!'**
+  String get yrhbss;
+
+  /// No description provided for @yohbssttl.
+  ///
+  /// In en, this message translates to:
+  /// **'Your order has been successfully sent to the laundry.'**
+  String get yohbssttl;
+
+  /// No description provided for @changing.
+  ///
+  /// In en, this message translates to:
+  /// **'changing'**
+  String get changing;
+
   /// No description provided for @account.
   ///
   /// In en, this message translates to:

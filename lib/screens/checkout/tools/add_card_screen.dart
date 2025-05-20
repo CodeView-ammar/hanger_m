@@ -49,6 +49,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         print('تم إضافة طريقة الدفع بنجاح');
+      
         Navigator.pop(context);
       } else {
         print('حدث خطأ: ${response.body}');
@@ -69,7 +70,7 @@ class _AddCardScreenState extends State<AddCardScreen> {
               "تم ايداع المبلغ مقابل فاتورة ",
               context
               );
-          addPaymentMethod('CARD', 'الدفع عند الاستلام', context);
+          addPaymentMethod('COD', 'الدفع عند الاستلام', context);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("تم الدفع بنجاح")),
           );

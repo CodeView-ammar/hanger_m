@@ -5,8 +5,8 @@ import 'package:shop/components/api_extintion/url_api.dart';
 class AuthService {
   final String apiUrl_verifyOTP = APIConfig.otpapiverifyEndpoint; // تأكد من أن هذا هو URL الصحيح للتحقق
   final String apiUrl_sendOTP = APIConfig.otpapisendOTPEndpoint;
-  final String apiSecret = '\$2y\$10\$jUwPsrvdplRWoTD5nGoaCOjD3j.3bNEhC3iIAma1TV9xDseuCYhZG';
-
+  // final String apiSecret = '\$2y\$10\$jUwPsrvdplRWoTD5nGoaCOjD3j.3bNEhC3iIAma1TV9xDseuCYhZG';
+  final String apiSecret = "\$2y\$10\$hpoyPELoF.EOEPUsnuN3getdiKmDdL9Q1e2FQYI8F27FB9fsJTs2.";
   Future<bool> sendOTP(String phone) async {
     final response = await http.post(
       Uri.parse(apiUrl_sendOTP),

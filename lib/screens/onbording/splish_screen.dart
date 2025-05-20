@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shop/constants.dart';
+import 'package:shop/route/route_constants.dart';
+import 'package:shop/screens/onbording/sub_main.dart';
 import 'package:shop/screens/onbording/views/onbording_screnn.dart'; // تأكد من المسار الصحيح
 
 class SplashScreen extends StatefulWidget {
@@ -31,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     
     // التحقق من إذا كانت الشاشة ما تزال موجودة
     if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/onboarding');
+        Navigator.of(context).pushReplacementNamed(WelcomeScreenScreenRoute);
     }
   }
 
@@ -62,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               ScaleTransition(
                 scale: _animation,
                 child: Image.asset(
-                  "assets/images/log.png", // استبدل بالصورة التي تريدها
+                  "assets/images/splash_screen.png", // استبدل بالصورة التي تريدها
                 ),
               ),
               const SizedBox(height: 20),

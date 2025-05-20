@@ -7,6 +7,8 @@ import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/constants.dart';
 import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
+import 'package:shop/screens/checkout/tools/add_card_screen.dart';
+import 'package:shop/screens/checkout/views/cart_screen.dart';
 import 'package:shop/screens/checkout/views/delegate_note.dart';
 import 'package:shop/screens/checkout/views/payment_method.dart';
 import 'package:shop/screens/checkout/views/time.dart';
@@ -88,17 +90,19 @@ class _ReviewOrderScreenState extends State<ReviewOrderScreen> {
 Future<void> fetchDefaultPaymentMethod() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userid');
-
-    final response = await http.post(
-      Uri.parse(APIConfig.PaymentUrl),
+    print(userId);
+    final response = await http.get(
+      Uri.parse("${APIConfig.getPaymentMethodViewSetUrl}?user=$userId"),
       headers: {'Content-Type': 'application/json'},
-      body: json.encode({'user': userId}),
+      // body: json.encode({'user': userId}),
     );
-    print(response.statusCode);
+    // print("${APIConfig.getPaymentMethodViewSetUrl}?user=$userId");
+    // print(response.statusCode);
     if (response.statusCode == 200) {
       final Map<String, dynamic> responseData = json.decode(response.body);
       setState(() {
         String payment = responseData['payment_method']?? ''; // تعيين COD كقيمة افتراضية
+        print(payment);
         switch (payment) {
           case "الدفع عند الاستلام":
             defaultPaymentMethod = "COD";
@@ -184,9 +188,9 @@ void _showPaymentMethodDialog() {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              
-              title: const Text('تم إرسال الطلب بنجاح!'),
-              content: const Text('تم إرسال طلبك بنجاح إلى المغسلة.'),
+               
+              title:  Text(AppLocalizations.of(context)!.yrhbss),
+              content:  Text(AppLocalizations.of(context)!.yohbssttl),
               actions: <Widget>[
                 TextButton(
                   child:  Text(AppLocalizations.of(context)!.oK),
@@ -252,7 +256,7 @@ void _showPaymentMethodDialog() {
   }
 
   String formatAddress(String address) {
-    if (address.length > 40) {
+    if (address.length > 20) {
       return address.substring(0, 25) + '...';
     }
     return address;
@@ -262,10 +266,29 @@ void _showPaymentMethodDialog() {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: AppBar(
-        title:  Text(AppLocalizations.of(context)!.reviewrequest),
+    appBar: AppBar(
+      title: Text(AppLocalizations.of(context)!.reviewrequest),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          // استبدال الشاشة الحالية بالشاشة التي تريد العودة إليها
+               // منطق إنهاء الطلب
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CartScreen(),
+                      settings: RouteSettings(
+                        arguments: {
+                          'id': widget.laundryId, // تمرير الـ id هنا
+                          // إذا كان لديك متغيرات أخرى مثل distance و duration، تأكد من تعريفها في الكلاس
+                        },
+                      ),
+                    ),
+                  );
+             
+        },
       ),
-      body: SingleChildScrollView(
+    ),      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -354,11 +377,11 @@ void _showPaymentMethodDialog() {
                       onPressed: () {
                         Navigator.pushNamed(context, addressesScreenRoute);
                       },
-                      child: const Text(
-                        'تغيير',
+                      child:  Text(
+                        AppLocalizations.of(context)!.changing ,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 17,
+                          fontSize: 10,
                           color: Color.fromRGBO(10, 10, 10, 1),
                           decoration: TextDecoration.underline,
                         ),
@@ -383,13 +406,13 @@ void _showPaymentMethodDialog() {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.note_add, size: 24),
-                            SizedBox(width: 8),
+                            const Icon(Icons.note_add, size: 24),
+                            const SizedBox(width: 8),
                             Text(
-                              'ملاحظة للمندوب',
-                              style: TextStyle(fontSize: 16),
+                              AppLocalizations.of(context)!.notedelegate,
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         ),
@@ -411,16 +434,16 @@ void _showPaymentMethodDialog() {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      delegateNote.isEmpty ? 'مثال: لا تقوم بدق على الجرس' : delegateNote,
+                      delegateNote.isEmpty ? AppLocalizations.of(context)!.exampledont : delegateNote,
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-              const Text(
-                'تفاصيل الدفع',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Color.fromRGBO(10, 10, 10, 1)),
+              Text(
+                AppLocalizations.of(context)!.paymentdetails,
+                style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Color.fromRGBO(10, 10, 10, 1)),
               ),
               const SizedBox(height: 16),
               Container(
@@ -429,14 +452,14 @@ void _showPaymentMethodDialog() {
                   color: Colors.blue[50],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.info, color: Colors.blue),
-                    SizedBox(width: 8),
+                    const Icon(Icons.info, color: Colors.blue),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'اختر طريقة الدفع أونلاين لاستخدام الرصيد المتاح',
-                        style: TextStyle(fontSize: 16),
+                        AppLocalizations.of(context)!.copmtut,
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                   ],
@@ -456,13 +479,13 @@ void _showPaymentMethodDialog() {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                         Row(
                           children: [
                             Icon(Icons.payment, size: 24),
                             SizedBox(width: 8),
                             Text(
-                              'طرق الدفع',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              AppLocalizations.of(context)!.paymentmethods,
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
@@ -478,11 +501,11 @@ void _showPaymentMethodDialog() {
                               ),
                             );
                           },
-                          child: const Padding(
-                            padding: EdgeInsets.only(bottom: 10, top: 10, left: 10, right: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 10, top: 10, left: 10, right: 10),
                             child: Text(
-                              'اختر',
-                              style: TextStyle(
+                              AppLocalizations.of(context)!.choose,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 17,
                                 backgroundColor: Color.fromRGBO(251, 255, 1, 1),
@@ -497,10 +520,10 @@ void _showPaymentMethodDialog() {
                     const SizedBox(height: 8),
                       Text(
                         defaultPaymentMethod == "CARD" 
-                          ? 'تم الدفع باستخدام البطاقة' 
+                          ?  AppLocalizations.of(context)!.pmbc
                           : (defaultPaymentMethod == null ) 
-                              ? 'يجب عليك تحديد طريقة الدفع' 
-                              : 'الدفع عند الاستلام',
+                              ? AppLocalizations.of(context)!.ymsapm 
+                              :  AppLocalizations.of(context)!.pur,
                         style: const TextStyle(fontSize: 14, color: Colors.grey),
                       )                  ],
                 ),
@@ -520,12 +543,12 @@ void _showPaymentMethodDialog() {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'اجمالي الطلب',
+                     Text(
+                       AppLocalizations.of(context)!.totaldemand,
                       style: TextStyle(fontSize: 10),
-                    ),
+                    ), 
                     Text(
-                      '${widget.total} ريال',
+                      '${widget.total} ${AppLocalizations.of(context)!.sar}',
                       style: const TextStyle(fontSize: 10),
                     ),
                   ],
@@ -541,12 +564,12 @@ void _showPaymentMethodDialog() {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'سعر التوصيل',
+                     Text(
+                      AppLocalizations.of(context)!.deliveryprice,
                       style: TextStyle(fontSize: 10),
                     ),
                     Text(
-                      '${(price_per_kg != null && widget.distance != null) ? (double.tryParse(price_per_kg!)! * widget.distance).toStringAsFixed(2) : '0.00'} ريال',
+                      '${(price_per_kg != null && widget.distance != null) ? (double.tryParse(price_per_kg!)! * widget.distance).toStringAsFixed(2) : '0.00'} ${AppLocalizations.of(context)!.sar}',
                       style: const TextStyle(fontSize: 10),
                     ),
                   ],
@@ -567,12 +590,12 @@ void _showPaymentMethodDialog() {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'الإجمالي',
+                     Text(
+                      AppLocalizations.of(context)!.total,
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      '${totalAmount.toStringAsFixed(2)} ريال',
+                      '${totalAmount.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
                       style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ],
@@ -581,8 +604,8 @@ void _showPaymentMethodDialog() {
               const SizedBox(height: 8),
               // إظهار حالة الدفع (مدفوع أو غير مدفوع)
               Text(
-                widget.isPaid ? 'تم الدفع' : 'لم يتم الدفع',
-                style: TextStyle(
+                widget.isPaid ?  AppLocalizations.of(context)!.paid : AppLocalizations.of(context)!.notpaid,
+                style: TextStyle( 
                   fontSize: 14, 
                   color: widget.isPaid ? Colors.green : Colors.red,
                   fontWeight: FontWeight.bold,
@@ -595,7 +618,7 @@ void _showPaymentMethodDialog() {
                     backgroundColor: primaryColor,
                   ),
                   onPressed: submitOrder,
-                  child: const Text('إرسال الطلب'),
+                  child:  Text(AppLocalizations.of(context)!.submitrequest),
                 ),
               ),
             ],

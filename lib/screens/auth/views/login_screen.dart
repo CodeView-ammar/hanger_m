@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child:  Text(
                           AppLocalizations.of(context)!.privacypolicy,
-                          style: TextStyle(
+                          style:const TextStyle(
                             fontSize: 16,
                             color: primaryColor,
                             decoration: TextDecoration.underline,
@@ -90,12 +90,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   ElevatedButton(
                     onPressed: isPrivacyPolicyAccepted
                         ? () async {
+                          
                             // التحقق أولًا من صحة النموذج والموافقة على سياسة الخصوصية
                             if (_formKey.currentState?.validate() ?? false) {
                               _formKey.currentState?.save(); // حفظ البيانات المدخلة
-
                               // التأكد من أن الرقم تم حفظه
                               if (phoneNumber != null && phoneNumber!.isNotEmpty) {
+                              
                                 var sendOTP = AuthService();
                                 bool success = await sendOTP.sendOTP(phoneNumber!); // استخدام الرقم المدخل
 

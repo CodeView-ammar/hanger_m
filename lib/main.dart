@@ -135,7 +135,7 @@ class _MyAppState extends State<MyApp> {
       theme: AppTheme.lightTheme(context),
       themeMode: ThemeMode.light,
       onGenerateRoute: router.generateRoute,
-      initialRoute: onbordingScreenRoute,
+      initialRoute: SplashScreenRoute,
       locale: _appLocale, // استخدام اللغة من الكاش أو الافتراضي
       supportedLocales: const [
         Locale('ar'), 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shop/l10n/app_localizations.dart';
 
 class TimeIndicator extends StatelessWidget {
   final String time;
@@ -11,7 +12,7 @@ class TimeIndicator extends StatelessWidget {
       children: [
         Icon(Icons.timer),
         SizedBox(width: 5),
-        Text("مدة التوصيل المتوقعة"),
+        Text(AppLocalizations.of(context)!.expecteddeliverytime),
         SizedBox(width: 30),
         Text(time,
         style: const TextStyle(
@@ -21,7 +22,7 @@ class TimeIndicator extends StatelessWidget {
           ),
         ),
         SizedBox(width: 10),
-        Text("دقيقة",   
+        Text(AppLocalizations.of(context)!.minute,   
           style: const TextStyle(
           fontSize: 15,
            color: Color.fromRGBO( 0, 0, 0,1),

@@ -11,7 +11,9 @@ class APIConfig {
   static String get userEndpoint => '$api_baseUrl/users/register/';
   static String get markEndpoint_get => '$api_baseUrl/user_laundry_marks_a/';
   static String get markEndpoint_delete => '$api_baseUrl/user_laundry_marks_delete/';
-  static String get servicesEndpoint => '$api_baseUrl/services/';
+  // static String get servicesEndpoint => '$api_baseUrl/services/';
+  static String get servicesEndpoint => '$api_baseUrl/laundry-services/';
+  
   static String get otpphoneEndpoint => '$api_baseUrl/user_phone/';
   static String get useraddEndpoint => '$api_baseUrl/users/';
   static String get markerEndpoint => '$api_baseUrl/user_laundry_marks/';
@@ -23,6 +25,7 @@ class APIConfig {
   static String get cartRemoveEndpoint => '$api_baseUrl/cart/delete/';
   static String get orderSubmitUrl => '$api_baseUrl/submit-order/';
   static String get addPaymentUrl => '$api_baseUrl/add-payment-method/';
+  static String get getPaymentMethodViewSetUrl => '$api_baseUrl/getPaymentMethodViewSet';
   static String get PaymentUrl => '$api_baseUrl/payment-methods/';
   static String get orderuserUrl => '$api_baseUrl/orders-user/';
   static String get orderlaundryUrl => '$api_baseUrl/orders-laundry/';
@@ -34,6 +37,10 @@ class APIConfig {
   static String get notificationsEndpoint => '$api_baseUrl/notifications/';
   static String get salesagentorderEndpoint => '$api_baseUrl/sales-agent-order/';
   static String get addTransactionEndpoint => '$api_baseUrl/transactions/';
+  
+  
+  static String get SubServicesEndpoint => '$api_baseUrl/subservices/';
+  
  
   static String get apiMap=>'AIzaSyAF2Uo1kHze6N9E8xAwEcrp5Mqw0ol0ekk';
   static String get apiPayment=>'pk_test_gLVjbsVjL1U2XZiKtFD9sRr6abDTJZS3GgKstC2G';

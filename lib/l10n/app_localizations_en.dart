@@ -121,6 +121,81 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'logout';
 
   @override
+  String get paymentdetails => 'payment details';
+
+  @override
+  String get notedelegate => 'Note to the delegate';
+
+  @override
+  String get exampledont => 'Example: Don\'t ring the bell.';
+
+  @override
+  String get minute => 'minute';
+
+  @override
+  String get expecteddeliverytime => 'Expected delivery time';
+
+  @override
+  String get choose => 'choose';
+
+  @override
+  String get copmtut => 'Choose an online payment method to use the available balance.';
+
+  @override
+  String get paymentmethods => 'payment methods';
+
+  @override
+  String get pmbc => 'Payment made by card';
+
+  @override
+  String get pur => 'Payment upon receipt';
+
+  @override
+  String get ymsapm => 'You must select a payment method.';
+
+  @override
+  String get totaldemand => 'Total demand';
+
+  @override
+  String get notpaid => 'Not paid';
+
+  @override
+  String get paid => 'paid';
+
+  @override
+  String get subService => 'Additional services';
+
+  @override
+  String get submitrequest => 'Submit the request';
+
+  @override
+  String get deliveryprice => 'Delivery price';
+
+  @override
+  String get poloic => 'Pay online later or in cash';
+
+  @override
+  String get piaopettaotrrto => 'Pay in cash or pay electronically through the app once the representative receives the order.';
+
+  @override
+  String get ptaspumn => 'Pay to a specific party using a mobile number';
+
+  @override
+  String get aanc => 'Add a new card';
+
+  @override
+  String get yhnac => 'You have no added cards.';
+
+  @override
+  String get yrhbss => 'Your request has been sent successfully!';
+
+  @override
+  String get yohbssttl => 'Your order has been successfully sent to the laundry.';
+
+  @override
+  String get changing => 'changing';
+
+  @override
   String get account => 'account';
 
   @override

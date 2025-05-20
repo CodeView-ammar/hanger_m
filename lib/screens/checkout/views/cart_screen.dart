@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:shop/constants.dart';
 import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/screens/checkout/views/review_order.dart';
+import 'package:shop/screens/home/views/components/best_sellers.dart';
+import 'package:shop/screens/product/views/product_details_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -237,9 +239,15 @@ double distance = 0.0; // متغير للمسافة
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:  Text(AppLocalizations.of(context)!.shoppingcart),
+          appBar: AppBar(
+      title: Text(AppLocalizations.of(context)!.shoppingcart),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: () {
+             
+        },
       ),
+    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

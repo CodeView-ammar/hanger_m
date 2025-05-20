@@ -1,17 +1,33 @@
-import 'dart:convert';  // لإجراء عمليات تحويل JSON
+import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  // لإرسال الطلبات HTTP
-import 'package:shared_preferences/shared_preferences.dart';  // لاستخدام SharedPreferences
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/components/cart_button.dart';
 import 'package:shop/components/custom_modal_bottom_sheet.dart';
 import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
 import 'package:shop/screens/product/views/added_to_cart_message_screen.dart';
-
 import '../../../constants.dart';
 import 'components/product_quantity.dart';
 import 'components/unit_price.dart';
+
+class SubService {
+  final int id;
+  final String name;
+  final double price;
+
+  SubService({required this.id, required this.name, required this.price});
+
+  factory SubService.fromJson(Map<String, dynamic> json) {
+    return SubService(
+      id: json['id'],
+      name: utf8.decode(json['name'].codeUnits) ,
+      price: double.parse(json['price']),
+    );
+  }
+}
 
 class ProductBuyNowScreen extends StatefulWidget {
   final String serviceName;
@@ -21,8 +37,8 @@ class ProductBuyNowScreen extends StatefulWidget {
   final int quantity;
   final int laundry;
   final int serviceId;
-  final double distance; // إضافة المسافة
-  final String duration; // إضافة الوقت
+  final double distance;
+  final String duration;
 
   const ProductBuyNowScreen({
     super.key,
@@ -43,24 +59,54 @@ class ProductBuyNowScreen extends StatefulWidget {
 
 class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
   int _quantity = 1;
-  String _serviceType = 'عادية';  // إضافة متغير لتحديد نوع الخدمة (مستعجلة أو عادية)
+  String _serviceType = 'عادية';
+  List<SubService> _subServices = [];
+  List<SubService> _selectedSubServices = []; // قائمة لاختيار الخدمات الفرعية
 
-  // دالة لإضافة المنتج إلى السلة
+  @override
+  void initState() {
+    super.initState();
+    _fetchSubServices(); // Fetch sub-services on init
+  }
+
+  Future<void> _fetchSubServices() async {
+    final url = '${APIConfig.SubServicesEndpoint}?LaundryService_id=${widget.serviceId}';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _subServices = data.map((json) => SubService.fromJson(json)).toList();
+        });
+      } else {
+        // Handle error
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text('فشل في جلب الخدمات الفرعية!')),
+        // );
+      }
+    } catch (e) {
+      // Handle connection error
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('حدث خطأ في الاتصال!')),
+      // );
+    }
+  }
+
   Future<void> _addToCart() async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userid');  // جلب ID المستخدم من SharedPreferences
+    final userId = prefs.getString('userid');
 
     if (userId == null) {
-      // إذا لم يكن ID المستخدم موجودًا، يمكنك عرض رسالة خطأ
       Navigator.pushNamed(context, logInScreenRoute);
       return;
     }
 
-    // تحديد السعر بناءً على نوع الخدمة
-    double selectedPrice = (_serviceType == 'مستعجلة') ? widget.serveiceUrgentPrice : widget.servicePrice;
+    double totalSubServicePrice = _selectedSubServices.fold(0, (sum, item) => sum + item.price);
+    double selectedPrice = totalSubServicePrice + (widget.servicePrice * _quantity);
     String tServicetype = (_serviceType == 'مستعجلة') ? 'urgent' : 'normal';
 
-    final url = APIConfig.CartsEndpoint;  // استبدل بـ URL الخاص بك
+    final url = APIConfig.CartsEndpoint;
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -68,50 +114,38 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'price': selectedPrice,  // استخدام السعر الذي تم اختياره بناءً على نوع الخدمة
-          "urgent_price": widget.serveiceUrgentPrice,
+          'price': selectedPrice,
+          'urgent_price': widget.serveiceUrgentPrice,
           'quantity': _quantity,
           'user': userId,
           'laundry': widget.laundry,
           'service': widget.serviceId,
-          'service_type': tServicetype,  // إرسال نوع الخدمة
+          'service_type': tServicetype,
+          'sub_service_ids': _selectedSubServices.map((s) => s.id).toList(), // إرسال قائمة الخدمات الفرعية المختارة
         }),
       );
 
-      // print(response.statusCode);
-
       if (response.statusCode == 201 || response.statusCode == 200) {
-        // إذا تم إضافة المنتج بنجاح
-
         customModalBottomSheet(
           context,
           isDismissible: false,
           child: AddedToCartMessageScreen(laundryId: widget.laundry),
         );
       } else {
-        // معالجة الخطأ
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('فشل في إضافة المنتج إلى السلة!'),
-          ),
+          SnackBar(content: Text('فشل في إضافة المنتج إلى السلة!')),
         );
       }
     } catch (e) {
-      // في حال حدوث أي خطأ في الاتصال
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('حدث خطأ في الاتصال!'),
-        ),
+        SnackBar(content: Text('حدث خطأ في الاتصال!')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // حساب السعر الإجمالي بناءً على نوع الخدمة
-    double totalPrice = (_serviceType == 'مستعجلة') 
-        ? widget.serveiceUrgentPrice * _quantity
-        : widget.servicePrice * _quantity;
+    double totalPrice = (widget.servicePrice * _quantity) + _selectedSubServices.fold(0, (sum, item) => sum + item.price);
 
     return Scaffold(
       bottomNavigationBar: CartButton(
@@ -119,29 +153,23 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
         title: "اضافة للسلة",
         subTitle: "الإجمالي",
         press: () {
-          _addToCart();  // استدعاء دالة إضافة المنتج إلى السلة
+          _addToCart();
         },
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: defaultPadding / 2, vertical: defaultPadding),
+            padding: const EdgeInsets.symmetric(horizontal: defaultPadding / 2, vertical: defaultPadding),
             child: Row(
-              
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const BackButton(),
-                    Text(
-                      widget.serviceName,
-                      style: TextStyle(
-                        fontSize: 16, // حجم الخط
-                        fontWeight: FontWeight.bold, // سمك الخط
-                        color: Colors.black, // لون النص
-                      ),
-                    ),
-              const SizedBox(width: 18),
-                                ],
+                Text(
+                  widget.serviceName,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                const SizedBox(width: 18),
+              ],
             ),
           ),
           Expanded(
@@ -156,11 +184,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: UnitPrice(
-                                price: (_serviceType == 'مستعجلة') 
-                                  ? widget.serveiceUrgentPrice
-                                  : widget.servicePrice,
-                              ),
+                              child: UnitPrice(price: totalPrice),
                             ),
                             ProductQuantity(
                               numOfItem: _quantity,
@@ -180,7 +204,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                           ],
                         ),
                         const SizedBox(height: defaultPadding),
-                        // إضافة اختيار نوع الخدمة كقائمة
+                        // اختيار نوع الخدمة
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -188,14 +212,13 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                             ListTile(
                               title: Text(AppLocalizations.of(context)!.normal),
                               leading: Transform.scale(
-                                scale: 1.5,  // تكبير الراديو بوتون
-                                child: Radio<String>(
-                                  focusColor: primaryColor,
-                                  value: 'عادية',
-                                  groupValue: _serviceType,
-                                  onChanged: (String? value) {
+                                scale: 1.5,
+                                child: Checkbox(
+                                  value: _serviceType == 'عادية',
+                                  onChanged: (bool? value) {
                                     setState(() {
-                                      _serviceType = value!;
+                                      _serviceType = 'عادية';
+                                      _selectedSubServices.clear(); // إعادة تعيين اختيار الخدمات الفرعية
                                     });
                                   },
                                 ),
@@ -204,19 +227,46 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                             ListTile(
                               title: Text(AppLocalizations.of(context)!.urgent),
                               leading: Transform.scale(
-                                scale: 1.5,  // تكبير الراديو بوتون
-                                child: Radio<String>(
-                                  focusColor: primaryColor,
-                                  value: 'مستعجلة',
-                                  groupValue: _serviceType,
-                                  onChanged: (String? value) {
+                                scale: 1.5,
+                                child: Checkbox(
+                                  value: _serviceType == 'مستعجلة',
+                                  onChanged: (bool? value) {
                                     setState(() {
-                                      _serviceType = value!;
+                                      _serviceType = 'مستعجلة';
+                                      _selectedSubServices.clear(); // إعادة تعيين اختيار الخدمات الفرعية
                                     });
                                   },
                                 ),
                               ),
                             ),
+                          ],
+                        ),
+                        const SizedBox(height: defaultPadding),
+                        // عرض الخدمات الفرعية كصناديق اختيار
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(AppLocalizations.of(context)!.subService, style: Theme.of(context).textTheme.bodyLarge),
+                            ..._subServices.map((subService) {
+                              return ListTile(
+                                title: Text(subService.name),
+                                leading: Transform.scale(
+                                  scale: 1.5,
+                                  child: Checkbox(
+                                    value: _selectedSubServices.contains(subService),
+                                    onChanged: (bool? value) {
+                                      setState(() {
+                                        if (value == true) {
+                                          _selectedSubServices.add(subService);
+                                        } else {
+                                          _selectedSubServices.remove(subService);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ],
                         ),
                       ],

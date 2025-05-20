@@ -86,8 +86,8 @@ class WelcomeScreen extends StatelessWidget {
               // ✅ إضافة الشعار
               Image.asset(
                 'assets/images/logo_white.png', // مسار الشعار
-                width: 150, // عرض الشعار (يمكن تعديله حسب الرغبة)
-                height: 300, // ارتفاع الشعار (يمكن تعديله حسب الرغبة)
+                width: 650, // عرض الشعار (يمكن تعديله حسب الرغبة)
+                height: 400, // ارتفاع الشعار (يمكن تعديله حسب الرغبة)
               ),
               const SizedBox(height: 20), // مساحة بين الشعار والنص
               Text(
