@@ -1,66 +1,17 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Dart & Flutter
 .dart_tool/
 .flutter-plugins
-.flutter-plugins-dependencies
+.packages
 .pub-cache/
-.pub/
-/build/
-
-# Symbolication related
-app.*.symbols
-
-# Obfuscation related
-app.*.map.json
-
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-.dart_tool/flutter_build/dart_plugin_registrant.dart
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/.filecache
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/app.dill
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/debug_android_application.stamp
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/flutter_assets.d
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/gen_localizations.stamp
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/kernel_snapshot_program.d
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/kernel_snapshot_program.stamp
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/outputs.json
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/program.dill
-.dart_tool/package_config_subset
-.dart_tool/package_config.json
-.dart_tool/dartpad/web_plugin_registrant.dart
-.dart_tool/flutter_build/dart_plugin_registrant.dart
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/.filecache
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/app.dill
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/debug_android_application.stamp
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/flutter_assets.d
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/gen_localizations.stamp
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/kernel_snapshot_program.d
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/kernel_snapshot_program.stamp
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/outputs.json
-.dart_tool/flutter_build/211d71ee770c9e2708346fe66795d8c6/program.dill
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+*.iml
+*.lock
+*.log
+.idea/
+android/.gradle/
+android/app/debug/
+android/app/profile/
+.android/
+*.keystore
