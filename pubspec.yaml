@@ -53,6 +53,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/logo.png
     - assets/icons/
     - assets/Illustration/
     - assets/flags/

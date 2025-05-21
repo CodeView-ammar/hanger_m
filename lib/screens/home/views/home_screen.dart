@@ -11,23 +11,35 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // إضافة متغير للتحكم في BestSellers
+  final GlobalKey<BestSellersState> _bestSellersKey = GlobalKey<BestSellersState>();
+  
   @override
   void initState() {
     super.initState();
   }
 
+  // دالة تحديث المغاسل فقط
+  Future<void> _refreshLaundries() async {
+    await _bestSellersKey.currentState?.refreshData();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(child: OffersCarouselAndCategories()),
-            SliverToBoxAdapter(child: BestSellers()),
-
-          ],
+        child: RefreshIndicator(
+          onRefresh: _refreshLaundries, // تحديث المغاسل فقط عند السحب للأسفل
+          child: CustomScrollView(
+            slivers: [
+              const SliverToBoxAdapter(child: OffersCarouselAndCategories()),
+              SliverToBoxAdapter(
+                child: BestSellers(key: _bestSellersKey),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-}  
+}

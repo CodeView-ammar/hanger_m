@@ -41,7 +41,7 @@ class _OtpState extends State<Otp> {
                   color: Colors.deepPurple.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: Image.asset('assets/images/log.png'),
+                child: Image.asset('assets/images/logo.png'),
               ),
               SizedBox(height: 24),
               Text(

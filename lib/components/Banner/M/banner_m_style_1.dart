@@ -10,6 +10,7 @@ class BannerMStyle1 extends StatelessWidget {
     required this.text,
     required this.press,
   });
+  
   final String? image;
   final String text;
   final VoidCallback press;
@@ -20,29 +21,41 @@ class BannerMStyle1 extends StatelessWidget {
       image: image!,
       press: press,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(defaultPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Spacer(flex: 2),
-              const Spacer(),
-              const Spacer(flex: 2),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.75,
-                child: 
-                Text(
-                  text,
-                  style: const TextStyle(
-                    fontFamily: grandisExtendedFont,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 24,
-                    color: Colors.white,
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: const [0.5, 1.0],
+              colors: [
+                Colors.transparent,
+                Colors.black.withOpacity(0.7),
+              ],
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(defaultPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // const Spacer(flex: 5),
+              
+                
+                // زر الإجراء بتصميم محسّن
+                Container(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
+                 
                 ),
-              ),
-             
-            ],
+              ],
+            ),
           ),
         ),
       ],

@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shop/components/custom_messages.dart';
 import 'package:shop/constants.dart';
 import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
@@ -148,7 +149,20 @@ void _showPaymentMethodDialog() {
     },
   );
 }
-
+// عرض رسائل الخطأ باستخدام مكون الرسائل المخصص
+  void _showErrorDialog(String message) {
+    AppMessageService().showErrorMessage(context, message, duration: const Duration(seconds: 4));
+  }
+  
+  // عرض رسالة نجاح
+  void _showSuccessMessage(String message) {
+    AppMessageService().showSuccessMessage(context, message, duration: const Duration(seconds: 3));
+  }
+  
+  // عرض رسالة تنبيه
+  void _showInfoMessage(String message) {
+    AppMessageService().showInfoMessage(context, message, duration: const Duration(seconds: 3));
+  }
   Future<void> submitOrder() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userid');
@@ -184,30 +198,8 @@ void _showPaymentMethodDialog() {
           );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-               
-              title:  Text(AppLocalizations.of(context)!.yrhbss),
-              content:  Text(AppLocalizations.of(context)!.yohbssttl),
-              actions: <Widget>[
-                TextButton(
-                  child:  Text(AppLocalizations.of(context)!.oK),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      entryPointScreenRoute,
-                      ModalRoute.withName(logInScreenRoute),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      } else {
+        _showSuccessMessage(AppLocalizations.of(context)!.yrhbss);
+        } else {
         print('فشل في إرسال الطلب: ${response.body}');
       }
     } catch (e) {

@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             Image.asset(
-              "assets/images/log.png",
+              "assets/images/logo.png",
               fit: BoxFit.cover,
             ),
             Padding(

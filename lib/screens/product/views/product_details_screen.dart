@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:math' as Math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
 import 'package:shop/components/cart_button.dart';
+import 'package:shop/components/custom_messages.dart';
 import 'package:shop/components/custom_modal_bottom_sheet.dart';
 import 'package:shop/constants.dart';
 import 'package:shop/screens/checkout/views/cart_screen.dart';
@@ -132,43 +134,83 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       throw Exception('المغسلة لا تمتلك خدمات');
     }
   }
- Future<void> saveLaundryData(String laundry) async {
+  Future<void> saveLaundryData(String laundry) async {
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userid'); // استرجاع userId من SharedPreferences إذا كان موجودًا
+    final userId = prefs.getString('userid');
+    
+    if (userId == null) {
+      // إذا لم يكن المستخدم مسجل دخول
+      AppMessageService().showWarningMessage(
+        context, 
+        'يجب تسجيل الدخول أولاً لإضافة المغسلة إلى المفضلة',
+        duration: const Duration(seconds: 4),
+      );
+      return;
+    }
 
     final url = APIConfig.markerEndpoint;
-
     final body = json.encode({
-      'user': userId, // إذا لم يكن هناك userId في SharedPreferences، يتم إرسال المستخدم من المعامل
-      'laundry': int.parse(laundry),     // البيانات المغسلة التي يتم إرسالها
+      'user': userId,
+      'laundry': int.parse(laundry),
     });
 
     try {
-     final response = await http.post(
+      // عرض مؤشر تحميل أثناء الحفظ
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      
+      final response = await http.post(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },
         body: body,
       );
-      print(response);
-     print('Sending data: $body');
-      if (response.statusCode == 200 || response.statusCode ==201) {
+      
+      // إغلاق مؤشر التحميل
+      if (context.mounted) Navigator.of(context).pop();
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
         // إذا تم الحفظ بنجاح
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('تم حفظ بيانات المغسلة بنجاح')),
+        AppMessageService().showSuccessMessage(
+          context, 
+          'تم إضافة المغسلة إلى المفضلة بنجاح'
+        );
+      } else if (response.statusCode == 400) {
+        // إذا كانت المغسلة موجودة بالفعل في المفضلة
+        AppMessageService().showInfoMessage(
+          context, 
+          'هذه المغسلة موجودة بالفعل في المفضلة'
         );
       } else {
         // إذا كانت هناك مشكلة في الاتصال أو حفظ البيانات
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('فشل في حفظ البيانات')),
+        AppMessageService().showErrorMessage(
+          context, 
+          'فشل في إضافة المغسلة إلى المفضلة. حاول مرة أخرى لاحقاً.',
         );
       }
     } catch (e) {
-      // إذا حدثت مشكلة في الاتصال بالخادم
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('حدث خطأ أثناء الاتصال بالخادم')),
-      );
+      // إغلاق مؤشر التحميل إذا حدث خطأ
+      if (context.mounted) Navigator.of(context).pop();
+      
+      // فحص إذا كان الخطأ بسبب عدم الاتصال بالإنترنت
+      if (e.toString().contains('SocketException') || 
+          e.toString().contains('Connection refused')) {
+        AppMessageService().showNoInternetMessage(context, onRetry: () {
+          saveLaundryData(laundry);
+        });
+      } else {
+        // أي خطأ آخر
+        AppMessageService().showErrorMessage(
+          context, 
+          'حدث خطأ أثناء الاتصال بالخادم: ${e.toString().substring(0, Math.min(50, e.toString().length))}...'
+        );
+      }
     }
   }
 
@@ -225,8 +267,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         price: totalPrice,
         press: () async {
           if (totalPrice == 0.0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('لا يمكن الانتقال إلى السلة لأن الإجمالي هو 0')),
+            AppMessageService().showWarningMessage(
+              context, 
+              'لا يمكن الانتقال إلى السلة لأنك لم تضف أي خدمات بعد',
             );
           } else {
             await Navigator.push(

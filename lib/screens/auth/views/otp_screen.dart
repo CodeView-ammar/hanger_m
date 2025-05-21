@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shop/components/api_extintion/otp_api.dart';
 import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shop/components/custom_messages.dart';
 import 'package:shop/constants.dart';
 import 'package:shop/l10n/app_localizations.dart';
 import 'package:shop/route/route_constants.dart';
@@ -20,20 +21,52 @@ class VerifyOTPScreen extends StatefulWidget {
   State<VerifyOTPScreen> createState() => _VerifyOTPScreenState();
 }
 
-class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
+class _VerifyOTPScreenState extends State<VerifyOTPScreen> with WidgetsBindingObserver {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _otpController1 = TextEditingController();
   final TextEditingController _otpController2 = TextEditingController();
   final TextEditingController _otpController3 = TextEditingController();
   final TextEditingController _otpController4 = TextEditingController();
+  
+  // متغير لتخزين الرمز كاملاً
+  final TextEditingController _fullOtpController = TextEditingController();
 
   bool _canResend = true;
   bool _isLoading = false; // متغير لتتبع حالة التحميل
   int _countdown = 60;
   Timer? _timer;
+  Timer? _clipboardCheckTimer;
+  
+  // التوجيه لدعم اللغة العربية
+  final TextDirection _textDirection = TextDirection.rtl;
 
   String get otp {
     return _otpController1.text + _otpController2.text + _otpController3.text + _otpController4.text;
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    
+    // بدء التحقق من الحافظة بشكل دوري
+    // _startClipboardCheck();
+    
+    // طلب التركيز على الحقل الأول بعد بناء الشاشة
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(FocusNode());
+    });
+    
+    // مراقبة تغييرات الرمز الكامل
+    _fullOtpController.addListener(_onFullOtpChanged);
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // عند العودة للتطبيق، تحقق من الحافظة
+    if (state == AppLifecycleState.resumed) {
+      _pasteOTPFromClipboard();
+    }
   }
 
   Future<bool> logIn(String phone, String id) async {
@@ -133,25 +166,115 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
   }
 
   Future<void> _pasteOTPFromClipboard() async {
-    final clipboardText = await Clipboard.getData('text/plain');
-    if (clipboardText != null && clipboardText.text != null) {
-      String otpFromClipboard = clipboardText.text!.trim();
-      if (otpFromClipboard.length == 4 && otpFromClipboard.contains(RegExp(r'^\d{4}$'))) {
-        setState(() {
-          _otpController1.text = otpFromClipboard[0];
-          _otpController2.text = otpFromClipboard[1];
-          _otpController3.text = otpFromClipboard[2];
-          _otpController4.text = otpFromClipboard[3];
-        });
+    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    if (clipboardData != null && clipboardData.text != null) {
+      String clipboardText = clipboardData.text!.trim();
+      
+      // البحث عن نمط رمز التحقق في النص
+      RegExp otpPattern = RegExp(r'[^0-9](\d{4})[^0-9]');
+      RegExpMatch? match = otpPattern.firstMatch(' $clipboardText ');
+      
+      if (match != null && match.group(1) != null) {
+        // إذا وجد نمط رمز في النص (مثل "رمز التحقق هو: 1234")
+        _fillOtpFields(match.group(1)!);
+        return;
+      } else if (clipboardText.length == 4 && RegExp(r'^\d{4}$').hasMatch(clipboardText)) {
+        // إذا كان النص المنسوخ هو 4 أرقام فقط
+        _fillOtpFields(clipboardText);
+        return;
       } else {
-        _showErrorDialog("الرمز غير صحيح، يرجى لصق رمز مكون من 4 أرقام فقط.");
+        // محاولة استخراج 4 أرقام متتالية من النص
+        RegExp digitsOnly = RegExp(r'\d{4}');
+        match = digitsOnly.firstMatch(clipboardText);
+        if (match != null) {
+          _fillOtpFields(match.group(0)!);
+          return;
+        }
       }
+      
+      // // إذا لم يتم العثور على رمز صالح
+      // AppMessageService().showWarningMessage(
+      //   context, 
+      //   'لم يتم العثور على رمز تحقق صالح في النص المنسوخ. يجب أن يكون الرمز 4 أرقام.',
+      // );
+    } else {
+      
     }
   }
 
+  // دالة للتعامل مع تغيير الرمز الكامل
+  void _onFullOtpChanged() {
+    String fullOtp = _fullOtpController.text;
+    if (fullOtp.length == 4) {
+      _otpController1.text = fullOtp[0];
+      _otpController2.text = fullOtp[1];
+      _otpController3.text = fullOtp[2];
+      _otpController4.text = fullOtp[3];
+    }
+  }
+  
+  // بدء التحقق من الحافظة بشكل دوري
+  void _startClipboardCheck() {
+    _clipboardCheckTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      _checkClipboardForOTP();
+    });
+  }
+  
+  // التحقق من الحافظة بحثاً عن رمز OTP
+  Future<void> _checkClipboardForOTP() async {
+    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+    if (clipboardData != null && clipboardData.text != null) {
+      String clipboardText = clipboardData.text!.trim();
+      
+      // البحث عن أنماط OTP في النص
+      // مثل: "رمز التحقق الخاص بك هو: 1234" أو "1234 هو رمز التحقق" أو مجرد 4 أرقام
+      RegExp otpRegex = RegExp(r'[^0-9](\d{4})[^0-9]');
+      RegExpMatch? match = otpRegex.firstMatch(' $clipboardText ');
+      
+      if (match != null && match.group(1) != null) {
+        String otpCode = match.group(1)!;
+        _fillOtpFields(otpCode);
+      } else if (clipboardText.length == 4 && RegExp(r'^\d{4}$').hasMatch(clipboardText)) {
+        // في حالة كان النص عبارة عن 4 أرقام فقط
+        _fillOtpFields(clipboardText);
+      }
+    }
+  }
+  
+  // تعبئة حقول OTP
+  void _fillOtpFields(String otpCode) {
+    if (otpCode.length == 4) {
+      setState(() {
+        _otpController1.text = otpCode[0];
+        _otpController2.text = otpCode[1];
+        _otpController3.text = otpCode[2];
+        _otpController4.text = otpCode[3];
+      });
+      
+      // // عرض إشعار بالرمز المكتشف
+      // AppMessageService().showSuccessMessage(
+      //   context, 
+      //   'تم التعرف على رمز التحقق تلقائياً: $otpCode'
+      // );
+      
+      // التحقق من الرمز مباشرة
+      Future.delayed(Duration(milliseconds: 500), () {
+        _verifyOTP();
+      });
+    }
+  }
+  
   @override
   void dispose() {
     _timer?.cancel();
+    _clipboardCheckTimer?.cancel();
+    _fullOtpController.removeListener(_onFullOtpChanged);
+    _fullOtpController.dispose();
+    _otpController1.dispose();
+    _otpController2.dispose();
+    _otpController3.dispose();
+    _otpController4.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -168,7 +291,7 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
       if (success) {
         _timer?.cancel(); // إلغاء المؤقت عند النجاح
       } else {
-        _showErrorDialog("خطأ في التحقق من الرمز");
+        // _showErrorDialog("خطأ في التحقق من الرمز");
     }
 
     if (success) {
@@ -188,7 +311,7 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
         );
       }
     } else {
-      _showErrorDialog("خطأ في التحقق من الرمز");
+      // _showErrorDialog("خطأ في التحقق من الرمز");
     }
 
     setState(() {
@@ -198,73 +321,250 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Image.asset("assets/images/log.png", fit: BoxFit.cover),
-                Padding(
+    return Directionality(
+      textDirection: TextDirection.rtl, // ضبط الاتجاه للغة العربية
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.black),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          centerTitle: true,
+          title: Image.asset(
+            "assets/images/logo.png",
+            height: 40,
+            fit: BoxFit.contain,
+          ),
+        ),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white,
+                      Color(0xFFF5F5F5),
+                    ],
+                  ),
+                ),
+              ),
+              SingleChildScrollView(
+                child: Padding(
                   padding: const EdgeInsets.all(defaultPadding),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        "تحقق من رقم الهاتف",
-                        style: Theme.of(context).textTheme.headlineSmall,
+                      // صورة وعنوان الصفحة
+                      Center(
+                        child: Container(
+                          width: 120,
+                          height: 120,
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.security,
+                            size: 60,
+                            color: primaryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: defaultPadding * 1.5),
+                      
+                      // عنوان الشاشة
+                      Center(
+                        child: Text(
+                          "تحقق من رقم الهاتف",
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       const SizedBox(height: defaultPadding / 2),
-                      const Text("أدخل الرمز المرسل إلى رقم هاتفك"),
-                      const SizedBox(height: defaultPadding),
+                      
+                      // وصف الشاشة
+                      Center(
+                        child: Text(
+                          "تم إرسال رمز تحقق مكون من 4 أرقام إلى رقم الهاتف ${widget.phone}",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: defaultPadding * 1.5),
+                      
+                      // حقول إدخال رمز التحقق
                       Container(
-                        padding: EdgeInsets.all(28),
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 5,
+                            ),
+                          ],
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child: Column(
                           children: [
-                            _textFieldOTP(controller: _otpController1, first: true, last: false),
-                            _textFieldOTP(controller: _otpController2, first: false, last: false),
-                            _textFieldOTP(controller: _otpController3, first: false, last: false),
-                            _textFieldOTP(controller: _otpController4, first: false, last: true),
+                            Text(
+                              "أدخل رمز التحقق",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: defaultPadding),
+                            
+                            // رمز OTP
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _textFieldOTP(controller: _otpController1, first: true, last: false),
+                                const SizedBox(width: 10),
+                                _textFieldOTP(controller: _otpController2, first: false, last: false),
+                                const SizedBox(width: 10),
+                                _textFieldOTP(controller: _otpController3, first: false, last: false),
+                                const SizedBox(width: 10),
+                                _textFieldOTP(controller: _otpController4, first: false, last: true),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: defaultPadding),
+                      
+                      // زر لصق الرمز
+                      const SizedBox(height: defaultPadding * 1.5),
                       Center(
-                        child: ElevatedButton.icon(
+                        child: TextButton.icon(
                           onPressed: _pasteOTPFromClipboard,
-                          icon: const Icon(Icons.paste),
-                          label: const Text("لصق الرمز"),
+                          icon: const Icon(Icons.content_paste_rounded),
+                          label: const Text("لصق الرمز تلقائياً"),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.grey[100],
+                            foregroundColor: primaryColor,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: defaultPadding),
-                      ElevatedButton(
-                        onPressed: _isLoading ? null : _verifyOTP, // تعطيل الزر إذا كان قيد التحميل
-                        child: const Text("تحقق"),
+                      
+                      // زر التحقق
+                      const SizedBox(height: defaultPadding * 1.5),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _verifyOTP,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor: Colors.grey[300],
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: _isLoading
+                            ?  Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text("جارِ التحقق..."),
+                                ],
+                              )
+                            : const Text(
+                                "تحقق من الرمز",
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                        ),
                       ),
+                      
+                      // زر إعادة إرسال الرمز
                       const SizedBox(height: defaultPadding),
-                      TextButton(
-                        onPressed: _canResend ? _resendOTP : null,
-                        child: Text(_canResend ? "إعادة إرسال الرمز" : "انتظر $_countdown ثانية"),
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              "لم تستلم الرمز؟",
+                              style: TextStyle(color: Colors.grey[700]),
+                            ),
+                            TextButton(
+                              onPressed: _canResend ? _resendOTP : null,
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              ),
+                              child: Text(
+                                _canResend ? "إعادة إرسال الرمز" : "انتظر $_countdown ثانية",
+                                style: TextStyle(
+                                  color: _canResend ? primaryColor : Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-            // عرض دائرة التحميل في منتصف الشاشة
-            if (_isLoading) 
-              Container(
-                color: Colors.black54, // خلفية مظلمة
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
               ),
-          ],
+              
+              // مؤشر التحميل في حالة التحقق
+              if (_isLoading)
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.black.withOpacity(0.5),
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child:const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            "جارِ التحقق من الرمز...",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -272,60 +572,94 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> {
 
   Widget _textFieldOTP({required TextEditingController controller, required bool first, required bool last}) {
     return Container(
-      height: 55,
-      child: AspectRatio(
-        aspectRatio: 1.0,
-        child: TextField(
-          controller: controller,
-          autofocus: true,
-          onChanged: (value) {
-            if (value.length == 1 && !last) {
-              FocusScope.of(context).nextFocus();
-            }
-            if (value.isEmpty && !first) {
-              FocusScope.of(context).previousFocus();
-            }
-          },
-          showCursor: true,
-          readOnly: false,
-          textAlign: TextAlign.center,
-          textDirection: TextDirection.rtl,
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          keyboardType: TextInputType.number,
-          maxLength: 1,
-          decoration: InputDecoration(
-            counter: Offstage(),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 2, color: Colors.black12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(width: 2, color: primaryColor),
-              borderRadius: BorderRadius.circular(12),
-            ),
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.05),
+            blurRadius: 5,
+            spreadRadius: 1,
           ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        autofocus: first,
+        onChanged: (value) {
+          // عند إدخال رقم، انتقل للحقل التالي
+          if (value.length == 1 && !last) {
+            FocusScope.of(context).nextFocus();
+          }
+          // عند حذف رقم، انتقل للحقل السابق
+          if (value.isEmpty && !first) {
+            FocusScope.of(context).previousFocus();
+          }
+        },
+        // خصائص المظهر
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr, // اتجاه للأرقام من اليسار لليمين
+        style: const TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: primaryColor,
         ),
+        // خصائص لوحة المفاتيح
+        keyboardType: TextInputType.number,
+        maxLength: 1,
+        // تخصيص شكل الإطار
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          counter: const Offstage(), // إخفاء عداد الأحرف
+          // شكل الإطار في الحالة العادية
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(width: 1.5, color: Color(0xFFEEEEEE)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          // شكل الإطار عند التركيز
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(width: 1.5, color: primaryColor),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          // خصائص إضافية للتصميم
+          contentPadding: EdgeInsets.zero,
+          // إضافة تأثير انتقالي للتغيير بين الحالات
+          hoverColor: primaryColor.withOpacity(0.1),
+        ),
+        // محاذاة النص
+        textAlignVertical: TextAlignVertical.center,
+        // تأثيرات إضافية
+        cursorColor: primaryColor,
+        cursorWidth: 2,
+        cursorHeight: 24,
+        // يمنع النسخ واللصق في الحقل الواحد
+        enableInteractiveSelection: false,
+        // يمنع تصحيح النص تلقائياً
+        autocorrect: false,
+        // إضافة تأثير صوتي عند الضغط
+        enableSuggestions: false,
+        // منع تغيير الحجم تلقائياً
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+        ],
       ),
     );
   }
 
+  // عرض رسائل الخطأ باستخدام مكون الرسائل المخصص
   void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(AppLocalizations.of(context)!.error),
-          content: Text(message),
-          actions: [
-            TextButton(
-              child: Text(AppLocalizations.of(context)!.oK),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    AppMessageService().showErrorMessage(context, message, duration: const Duration(seconds: 4));
+  }
+  
+  // عرض رسالة نجاح
+  void _showSuccessMessage(String message) {
+    AppMessageService().showSuccessMessage(context, message, duration: const Duration(seconds: 3));
+  }
+  
+  // عرض رسالة تنبيه
+  void _showInfoMessage(String message) {
+    AppMessageService().showInfoMessage(context, message, duration: const Duration(seconds: 3));
   }
 }

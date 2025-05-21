@@ -79,61 +79,159 @@ class _AddCardDetailsScreenState extends State<AddCardDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("اختر طريقة الدفع"),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Text(
-              AppLocalizations.of(context)!.paymentmethods,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            if (totalAmount != null) 
-              Text(
-                ' ${AppLocalizations.of(context)!.total}: ${totalAmount!} ${AppLocalizations.of(context)!.sar}',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green),
+            // معلومات الدفع في الأعلى
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            const SizedBox(height: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.paymentmethods,
+                    style: const TextStyle(
+                      fontSize: 20, 
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (totalAmount != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.green.shade100),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            AppLocalizations.of(context)!.total,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            '${totalAmount!.toStringAsFixed(2)} ${AppLocalizations.of(context)!.sar}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 8),
+            
+            // عنوان خيارات الدفع
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Text(
+                "اختر طريقة الدفع المناسبة",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[800],
+                ),
+              ),
+            ),
+            
+            // خيارات الدفع
             Expanded(
               child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 children: [
                   PaymentOption(
                     title: AppLocalizations.of(context)!.poloic,
-                    subtitle:AppLocalizations.of(context)!.piaopettaotrrto,
+                    subtitle: AppLocalizations.of(context)!.piaopettaotrrto,
                     logo: 'assets/icons/money_hand.jpg',
-                    total: totalAmount ?? 0.0, // ضمان عدم تمرير null
+                    total: totalAmount ?? 0.0,
                     onTap: () {
                       addPaymentMethod('COD', 'الدفع عند الاستلام', context);
                     },
                   ),
-                  const Divider(),
                   PaymentOption(
                     title: 'stc pay',
-                    subtitle:  AppLocalizations.of(context)!.ptaspumn,
+                    subtitle: AppLocalizations.of(context)!.ptaspumn,
                     logo: 'assets/icons/stc_pay.png',
-                    onTap: null, // الزر غير قابل للنقر
-                    isReadOnly: true, // خاصية لجعل الزر للقراءة فقط
-                    total: totalAmount ?? 0.0, // ضمان عدم تمرير null
+                    onTap: null,
+                    isReadOnly: true,
+                    total: totalAmount ?? 0.0,
                   ),
-                  const Divider(),
                   PaymentOption(
-                    title:  AppLocalizations.of(context)!.aanc,
-                    subtitle:  AppLocalizations.of(context)!.yhnac,
+                    title: AppLocalizations.of(context)!.aanc,
+                    subtitle: AppLocalizations.of(context)!.yhnac,
                     logo: 'assets/icons/credit_card.png',
-                    total: totalAmount ?? 0.0, // ضمان عدم تمرير null
+                    total: totalAmount ?? 0.0,
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AddCardScreen(name_windows: widget.name_windows,total: totalAmount ?? 0.0, laundryId:laundryId), // ضمان عدم تمرير null
+                          builder: (context) => AddCardScreen(
+                            name_windows: widget.name_windows,
+                            total: totalAmount ?? 0.0,
+                            laundryId: laundryId,
+                          ),
                         ),
-                        
                       );
                     },
                   ),
-                  const Divider()
+                ],
+              ),
+            ),
+            
+            // قسم معلومات الأمان
+            Container(
+              margin: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.security,
+                    color: Colors.grey[600],
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      "جميع المعاملات مؤمنة ومشفرة",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -148,8 +246,8 @@ class PaymentOption extends StatelessWidget {
   final String title;
   final String subtitle;
   final String logo;
-  final VoidCallback? onTap; // جعل onTap من نوع Nullable
-  final bool isReadOnly; // خاصية لجعل العنصر للقراءة فقط
+  final VoidCallback? onTap;
+  final bool isReadOnly;
   final double total;
   
   const PaymentOption({
@@ -158,24 +256,49 @@ class PaymentOption extends StatelessWidget {
     required this.subtitle,
     required this.logo,
     this.onTap,
-    this.isReadOnly = false, // القيمة الافتراضية هي false
+    this.isReadOnly = false,
     required this.total,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: isReadOnly ? null : onTap, // إذا كان العنصر للقراءة فقط، فلا يتم استدعاء onTap
+      onTap: isReadOnly ? null : onTap,
       child: Container(
-        color: isReadOnly ? Colors.grey[200] : Colors.transparent, // تغيير لون الخلفية إذا كان للقراءة فقط
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: isReadOnly ? Colors.grey[50] : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isReadOnly ? Colors.grey[300]! : Colors.grey[200]!,
+            width: 1.0,
+          ),
+          boxShadow: isReadOnly ? [] : [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
         child: Row(
           children: [
-            Image.asset(
-              logo,
-              width: 40,
-              height: 40,
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey[200]!, width: 1),
+              ),
+              child: Image.asset(
+                logo,
+                width: 30,
+                height: 30,
+                fit: BoxFit.contain,
+              ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,19 +307,54 @@ class PaymentOption extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: isReadOnly ? Colors.grey : Colors.black, // تغيير اللون إذا كان للقراءة فقط
+                      fontWeight: FontWeight.w600,
+                      color: isReadOnly ? Colors.grey[500] : Colors.black87,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: Colors.grey),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
             ),
-            if (isReadOnly) // إضافة عنصر مرئي إذا كان للقراءة فقط
-              const Icon(Icons.lock, color: Colors.grey), // أيقونة قفل
+            // إظهار زر مناسب حسب حالة الدفع
+            isReadOnly 
+              ? Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.lock_outline, size: 14, color: Colors.grey[600]),
+                      const SizedBox(width: 4),
+                      Text(
+                        "قريباً",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey[300]!),
+                  ),
+                  child: const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+                ),
           ],
         ),
       ),

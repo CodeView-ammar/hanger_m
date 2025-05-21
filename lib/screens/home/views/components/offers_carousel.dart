@@ -81,53 +81,138 @@ class _OffersCarouselState extends State<OffersCarousel> {
   Widget build(BuildContext context) {
     return AspectRatio(
       aspectRatio: 1.87,
-      child: Stack(
-        alignment: Alignment.bottomRight,
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            itemCount: _bannerData.length,
-            onPageChanged: (int index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
-            itemBuilder: (context, index) {
-              final banner = _bannerData[index];
-              return BannerMStyle1(
-                text: banner['caption'] ?? '',
-                image: banner['image'] ?? "https://i.imgur.com/aA8ST9l.jpeg",
-                press: () {
-                  // Add your banner click logic here
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              // عرض الصور مع تأثير انتقال سلس
+              PageView.builder(
+                controller: _pageController,
+                itemCount: _bannerData.isEmpty ? 1 : _bannerData.length,
+                onPageChanged: (int index) {
+                  setState(() {
+                    _selectedIndex = index;
+                  });
                 },
-              );
-            },
-          ),
-          FittedBox(
-            child: Padding(
-              padding: const EdgeInsets.all(defaultPadding),
-              child: SizedBox(
-                height: 16,
-                child: Row(
-                  children: List.generate(
-                    _bannerData.length,
-                    (index) {
-                      return Padding(
-                        padding:
-                            const EdgeInsets.only(left: defaultPadding / 4),
-                        child: DotIndicator(
-                          isActive: index == _selectedIndex,
-                          activeColor: Colors.white70,
-                          inActiveColor: const Color.fromARGB(179, 255, 255, 255),
-                        ),
-                      );
+                itemBuilder: (context, index) {
+                  // عرض صورة افتراضية إذا لم تكن هناك بيانات من API
+                  if (_bannerData.isEmpty) {
+                    return BannerMStyle1(
+                      text: "",
+                      image: "",
+                      press: () {},
+                    );
+                  }
+                  
+                  final banner = _bannerData[index];
+                  return BannerMStyle1(
+                    text: banner['caption'] ?? '',
+                    image: banner['image'] ?? "https://i.imgur.com/aA8ST9l.jpeg",
+                    press: () {
+                      // Add your banner click logic here
                     },
+                  );
+                },
+              ),
+              
+              // مؤشرات النقاط بتصميم محسّن
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _bannerData.isEmpty ? 1 : _bannerData.length,
+                    (index) => AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      height: 8,
+                      width: index == _selectedIndex ? 24 : 8,
+                      decoration: BoxDecoration(
+                        color: index == _selectedIndex 
+                            ? Colors.white 
+                            : Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          )
-        ],
+              
+              // أزرار التنقل (اختياري)
+              Positioned.fill(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // زر السابق
+                    GestureDetector(
+                      onTap: () {
+                        if (_selectedIndex > 0) {
+                          _pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                    
+                    // زر التالي
+                    GestureDetector(
+                      onTap: () {
+                        if (_selectedIndex < (_bannerData.isEmpty ? 0 : _bannerData.length - 1)) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

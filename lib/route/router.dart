@@ -197,10 +197,6 @@ case productReviewsScreenRoute:
         builder: (context) => const OnSaleScreen(),
       );
 
-    case searchScreenRoute:
-      return MaterialPageRoute(
-        builder: (context) => const SearchScreen(),
-      );
     case SplashScreenRoute:
       return MaterialPageRoute(
         builder: (context) => SplashScreen(),
