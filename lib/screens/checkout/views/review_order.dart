@@ -199,6 +199,7 @@ void _showPaymentMethodDialog() {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessMessage(AppLocalizations.of(context)!.yrhbss);
+         Navigator.of(context).pushNamedAndRemoveUntil(entryPointScreenRoute, (route) => false);
         } else {
         print('فشل في إرسال الطلب: ${response.body}');
       }
