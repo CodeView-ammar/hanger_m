@@ -121,12 +121,12 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           _isLoading = false;
           _errorMessage = 'فشل في تحميل البيانات: ${response.statusCode}';
         });
-        throw Exception('Failed to load data: ${response.statusCode}');
+        throw Exception();
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'حدث خطأ: $e';
+        _errorMessage = '';
       });
       throw Exception('Error: $e');
     }
@@ -146,12 +146,12 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
       if (response.statusCode == 204) {
         // عرض تأكيد الحذف
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
-                const Text('تم حذف المغسلة من المفضلة بنجاح'),
+                 Icon(Icons.check_circle, color: Colors.white),
+                 SizedBox(width: 8),
+                 Text('تم حذف المغسلة من المفضلة بنجاح'),
               ],
             ),
             backgroundColor: Colors.green,
@@ -167,13 +167,13 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
           _isLoading = false;
         });
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('فشل في حذف المغسلة من المفضلة'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text('فشل في حذف المغسلة من المفضلة'),
+        //     backgroundColor: Colors.red,
+        //     behavior: SnackBarBehavior.floating,
+        //   ),
+        // );
       }
     } catch (e) {
       setState(() {
@@ -265,13 +265,13 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    // Icon(Icons.error_outline, size: 48, color: Colors.red),
                     const SizedBox(height: 16),
-                    Text(
-                      _errorMessage ?? 'حدث خطأ: ${snapshot.error}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
-                    ),
+                    // Text(
+                    //   _errorMessage ?? 'حدث خطأ: ${snapshot.error}',
+                    //   textAlign: TextAlign.center,
+                    //   style: const TextStyle(color: Colors.red),
+                    // ),
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: () {
@@ -280,7 +280,7 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                         });
                       },
                       icon: const Icon(Icons.refresh),
-                      label: const Text('إعادة المحاولة'),
+                      label: const Text('تحديث'),
                     ),
                   ],
                 ),
@@ -539,14 +539,14 @@ class _BookmarkScreenState extends State<BookmarkScreen> {
                                           ),
                                         ),
                                         
-                                        // زر الحذف
-                                        IconButton(
-                                          onPressed: () => _showDeleteConfirmationDialog(laundry),
-                                          icon: Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red[400],
-                                          ),
-                                        ),
+                                        // // زر الحذف
+                                        // IconButton(
+                                        //   onPressed: () => _showDeleteConfirmationDialog(laundry),
+                                        //   icon: Icon(
+                                        //     Icons.delete_outline,
+                                        //     color: Colors.red[400],
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
                                   ),

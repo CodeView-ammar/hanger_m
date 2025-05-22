@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:intl/intl.dart';
-import 'package:shop/components/product/secondary_product_card.dart';
-
 import '../../../../constants.dart';
-
 class WalletHistoryCard extends StatelessWidget {
   const WalletHistoryCard({
     super.key,
-    this.isReturn = false,
+    required this.isReturn,
     required this.date,
     required this.amount,
-    required this.products,
+    required this.description,
   });
 
   final bool isReturn;
   final String date;
   final double amount;
-  final List products;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
@@ -119,57 +115,11 @@ class WalletHistoryCard extends StatelessWidget {
               ],
             ),
           ),
-          if (products.isNotEmpty) ...[
-            const Divider(height: 1, thickness: 1),
+          if (description.isNotEmpty)
             Padding(
               padding: const EdgeInsets.all(defaultPadding * 0.5),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "المنتجات",
-                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    "${products.length} عناصر",
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            ...List.generate(
-              products.length,
-              (index) => Padding(
-                padding: const EdgeInsets.only(
-                    bottom: defaultPadding * 0.75,
-                    left: defaultPadding,
-                    right: defaultPadding),
-                child: SecondaryProductCard(
-                  image: products[index].image,
-                  brandName: products[index].brandName,
-                  title: products[index].title,
-                  price: products[index].price,
-                  priceAfetDiscount: products[index].priceAfetDiscount,
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: Colors.grey.withOpacity(0.05),
-                    maximumSize: const Size(double.infinity, 90),
-                    padding: EdgeInsets.zero,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(defaultBorderRadious),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-          if (products.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(defaultPadding),
               child: Text(
-                isReturn ? "تمت عملية استرجاع المبلغ بنجاح" : "تمت عملية الدفع بنجاح",
+                description,
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),

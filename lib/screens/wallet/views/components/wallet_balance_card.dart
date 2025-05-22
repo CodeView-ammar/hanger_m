@@ -103,59 +103,59 @@ class WalletBalanceCard extends StatelessWidget {
               ],
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(defaultBorderRadious),
-                bottomRight: Radius.circular(defaultBorderRadious),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: primaryColor.withOpacity(0.1),
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  // أضف تأثير الاهتزاز عند الضغط
-                  HapticFeedback.mediumImpact();
-                  onTabChargeBalance();
-                },
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(defaultBorderRadious),
-                  bottomRight: Radius.circular(defaultBorderRadious),
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  alignment: Alignment.center,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add_circle_outline,
-                        color: primaryColor,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "إضافة رصيد",
-                        style: TextStyle(
-                          color: primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Container(
+          //   decoration: BoxDecoration(
+          //     color: Colors.white,
+          //     borderRadius: BorderRadius.only(
+          //       bottomLeft: Radius.circular(defaultBorderRadious),
+          //       bottomRight: Radius.circular(defaultBorderRadious),
+          //     ),
+          //     boxShadow: [
+          //       BoxShadow(
+          //         color: primaryColor.withOpacity(0.1),
+          //         blurRadius: 5,
+          //         offset: const Offset(0, 3),
+          //       ),
+          //     ],
+          //   ),
+          //   child: Material(
+          //     color: Colors.transparent,
+          //     child: InkWell(
+          //       onTap: () {
+          //         // أضف تأثير الاهتزاز عند الضغط
+          //         HapticFeedback.mediumImpact();
+          //         onTabChargeBalance();
+          //       },
+          //       borderRadius: BorderRadius.only(
+          //         bottomLeft: Radius.circular(defaultBorderRadious),
+          //         bottomRight: Radius.circular(defaultBorderRadious),
+          //       ),
+          //       child: Container(
+          //         padding: const EdgeInsets.symmetric(vertical: 14),
+          //         alignment: Alignment.center,
+          //         child:const Row(
+          //           mainAxisAlignment: MainAxisAlignment.center,
+          //           children: [
+          //             Icon(
+          //               Icons.add_circle_outline,
+          //               color: primaryColor,
+          //               size: 20,
+          //             ),
+          //             const SizedBox(width: 8),
+          //             Text(
+          //               "إضافة رصيد",
+          //               style: TextStyle(
+          //                 color: primaryColor,
+          //                 fontWeight: FontWeight.bold,
+          //                 fontSize: 16,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
