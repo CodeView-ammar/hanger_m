@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 
 
 class LocationService {

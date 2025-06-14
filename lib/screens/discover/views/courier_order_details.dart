@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/screens/checkout/views/payment_method.dart';
-import 'package:shop/screens/product/views/map_screen_laundry.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/screens/checkout/views/payment_method.dart';
+import 'package:melaq/screens/product/views/map_screen_laundry.dart';
 import 'package:location/location.dart';
 
 class CourierOrderDetailsScreen extends StatefulWidget {

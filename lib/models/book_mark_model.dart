@@ -1,5 +1,5 @@
 // For demo only
-import 'package:shop/constants.dart';
+import 'package:melaq/constants.dart';
 
 class ServiceModel {
   final String image, brandName, title;

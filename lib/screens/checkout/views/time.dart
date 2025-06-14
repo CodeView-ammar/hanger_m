@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop/l10n/app_localizations.dart';
+import 'package:melaq/l10n/app_localizations.dart';
 
 class TimeIndicator extends StatelessWidget {
   final String time;

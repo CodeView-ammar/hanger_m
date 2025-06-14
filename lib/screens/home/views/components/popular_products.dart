@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shop/components/product/product_card.dart';
-import 'package:shop/models/book_mark_model.dart';
+import 'package:melaq/components/product/product_card.dart';
+import 'package:melaq/models/book_mark_model.dart';
 
-import 'package:shop/route/screen_export.dart';
+import 'package:melaq/route/screen_export.dart';
 
 import '../../../../constants.dart';
 

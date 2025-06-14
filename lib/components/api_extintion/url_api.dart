@@ -42,7 +42,7 @@ class APIConfig {
   static String get SubServicesEndpoint => '$api_baseUrl/subservices/';
   
  
-  static String get apiMap=>'AIzaSyAF2Uo1kHze6N9E8xAwEcrp5Mqw0ol0ekk';
+  static String get apiMap=>'AIzaSyA903FiEEzDSEmogbe9-PkmA_v520gnrQ4';
   static String get apiPayment=>'pk_test_gLVjbsVjL1U2XZiKtFD9sRr6abDTJZS3GgKstC2G';
  
  

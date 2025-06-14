@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/components/custom_messages.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/route/route_constants.dart';
-import 'package:shop/screens/checkout/tools/add_card_screen.dart';
-import 'package:shop/screens/checkout/views/cart_screen.dart';
-import 'package:shop/screens/checkout/views/delegate_note.dart';
-import 'package:shop/screens/checkout/views/payment_method.dart';
-import 'package:shop/screens/checkout/views/time.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/components/custom_messages.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/route/route_constants.dart';
+import 'package:melaq/screens/checkout/tools/add_card_screen.dart';
+import 'package:melaq/screens/checkout/views/cart_screen.dart';
+import 'package:melaq/screens/checkout/views/delegate_note.dart';
+import 'package:melaq/screens/checkout/views/payment_method.dart';
+import 'package:melaq/screens/checkout/views/time.dart';
 
 class ReviewOrderScreen extends StatefulWidget {
   final int laundryId;

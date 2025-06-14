@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/screens/checkout/tools/add_card_screen.dart';
-import 'package:shop/screens/checkout/views/review_order.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/screens/checkout/tools/add_card_screen.dart';
+import 'package:melaq/screens/checkout/views/review_order.dart';
 
 class AddCardDetailsScreen extends StatefulWidget {
   final String name_windows;

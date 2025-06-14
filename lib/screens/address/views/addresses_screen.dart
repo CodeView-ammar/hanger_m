@@ -7,10 +7,9 @@ import 'package:location/location.dart' as location_;
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/route/route_constants.dart';
-
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/route/route_constants.dart';
 
 class AddressesScreen extends StatefulWidget {
   const AddressesScreen({Key? key}) : super(key: key);
@@ -28,13 +27,18 @@ class AddressesScreenState extends State<AddressesScreen> {
   late BitmapDescriptor customMarker;
   late GoogleMapController mapController;
   TextEditingController addressController = TextEditingController();
+  TextEditingController searchController = TextEditingController();
   StreamSubscription<location_.LocationData>? locationSubscription;
+  List<dynamic> placeSuggestions = [];
+  Timer? _debounce;
+
+  static const String googleMapsApiKey = "AIzaSyA903FiEEzDSEmogbe9-PkmA_v520gnrQ4"; // استخدم مفتاحك هنا
 
   @override
   void initState() {
     super.initState();
     _loadCustomMarker();
-    fetchLocationFromApi(); // جلب الموقع من API عند بدء التطبيق
+    fetchLocationFromApi();
   }
 
   Future<void> _loadCustomMarker() async {
@@ -44,132 +48,71 @@ class AddressesScreenState extends State<AddressesScreen> {
     );
   }
 
-
-Future<void> fetchLocationFromApi() async {
+  Future<void> fetchLocationFromApi() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString('userid');
-
     if (userId == null) {
       Navigator.pushNamed(context, logInScreenRoute);
       return;
     }
-  
-  // جلب الموقع المحفوظ في SharedPreferences
-  double? savedLatitude = prefs.getDouble('latitude');
-  double? savedLongitude = prefs.getDouble('longitude');
 
-  // إرسال طلب HTTP لجلب البيانات من الـ API
-  final response = await http.get(Uri.parse('${APIConfig.getaddressEndpoint}$userId/'));
+    double? savedLatitude = prefs.getDouble('latitude');
+    double? savedLongitude = prefs.getDouble('longitude');
+    final response = await http.get(Uri.parse('${APIConfig.getaddressEndpoint}$userId/'));
 
-  if (response.statusCode == 200) {
-    final data = json.decode(response.body);
-    setState(() {
-      // إذا كانت البيانات موجودة من الـ API
-      userLocationMarker = LatLng(
-        double.parse(data['x_map']),
-        double.parse(data['y_map']),
-      );
-      addressText = data['address_line'];
-      
-      // حفظ البيانات في SharedPreferences
-      prefs.setDouble('latitude', double.parse(data['x_map']));
-      prefs.setDouble('longitude', double.parse(data['y_map']));
-    });
-  } else {
-    if (savedLatitude != null && savedLongitude != null) {
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
       setState(() {
-        // إذا كانت القيم محفوظة في SharedPreferences
-        userLocationMarker = LatLng(savedLatitude, savedLongitude);
-        addressText = 'العنوان غير متوفر'; // يمكن أن تضع عنوانًا افتراضيًا إذا رغبت
+        userLocationMarker = LatLng(
+          double.parse(data['x_map']),
+          double.parse(data['y_map']),
+        );
+        addressText = data['address_line'];
+        prefs.setDouble('latitude', double.parse(data['x_map']));
+        prefs.setDouble('longitude', double.parse(data['y_map']));
       });
     } else {
-      // جلب الموقع الحالي للمستخدم إذا لم تكن القيم موجودة في SharedPreferences أو الـ API
-      Position position = await _getCurrentLocation();
-
-      setState(() {
-        // استخدام الموقع الحالي للمستخدم
-        userLocationMarker = LatLng(position.latitude, position.longitude);
-        addressText = ''; // يمكنك تعديل العنوان بناءً على الموقع الحالي
-      });
+      if (savedLatitude != null && savedLongitude != null) {
+        setState(() {
+          userLocationMarker = LatLng(savedLatitude, savedLongitude);
+          addressText = 'العنوان غير متوفر';
+        });
+      } else {
+        Position position = await _getCurrentLocation();
+        setState(() {
+          userLocationMarker = LatLng(position.latitude, position.longitude);
+          addressText = '';
+        });
+      }
     }
+
+    await getCurrentLocation(userLocationMarker.latitude, userLocationMarker.longitude);
   }
 
-  // استدعاء دالة getCurrentLocation لتحديث الموقع
-  await getCurrentLocation(userLocationMarker.latitude, userLocationMarker.longitude);
-}
+  Future<Position> _getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return Future.error('خدمة الموقع غير مفعلّة');
 
-// دالة لجلب الموقع الحالي للمستخدم باستخدام Geolocator
-Future<Position> _getCurrentLocation() async {
-  bool serviceEnabled;
-  LocationPermission permission;
-
-  // تحقق من حالة خدمة الموقع
-  serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  if (!serviceEnabled) {
-    // إذا كانت خدمة الموقع غير مفعلّة، يمكنك إظهار رسالة أو اتخاذ إجراء آخر
-    return Future.error('خدمة الموقع غير مفعلّة');
-  }
-
-  // تحقق من صلاحية الأذونات
-  permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
+    LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
-      return Future.error('إذن الوصول إلى الموقع مرفوض');
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return Future.error('إذن الوصول إلى الموقع مرفوض');
     }
+
+    if (permission == LocationPermission.deniedForever) return Future.error('إذن مرفوض دائمًا');
+
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
-
-  if (permission == LocationPermission.deniedForever) {
-    return Future.error('إذن الوصول إلى الموقع مرفوض بشكل دائم');
-  }
-
-  // الحصول على الموقع الحالي
-  return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-}
-
 
   Future<void> getCurrentLocation(double latitude, double longitude) async {
-    bool serviceEnabled = await location.serviceEnabled();
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-      if (!serviceEnabled) return;
-    }
+    if (!await location.serviceEnabled() && !await location.requestService()) return;
+    if (await location.hasPermission() == location_.PermissionStatus.denied &&
+        await location.requestPermission() != location_.PermissionStatus.granted) return;
 
-    location_.PermissionStatus permissionGranted = await location.hasPermission();
-    if (permissionGranted == location_.PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-      if (permissionGranted != location_.PermissionStatus.granted) return;
-    }
-
-    if (latitude != null||longitude != null) {
-      setState(() {
-        userLocationMarker = LatLng(latitude, longitude);
-      });
-    }else{
-        final prefs = await SharedPreferences.getInstance();
-        double? latitude = prefs.getDouble('latitude');
-        double? longitude = prefs.getDouble('longitude');
-
-        if (latitude != null && longitude != null) {
-          setState(() {
-            userLocationMarker = LatLng(latitude, longitude);
-          });
-        } else {
-          // هنا يمكنك التعامل مع الحالة إذا كانت القيم غير موجودة (null)
-          print("No latitude and longitude saved in SharedPreferences.");
-        }
-
-    }
-
+    setState(() => userLocationMarker = LatLng(latitude, longitude));
     currentLocation = await location.getLocation();
-    if (currentLocation != null) {
-    }
-
-    // Initialize locationSubscription only after location is fetched
-    locationSubscription = location.onLocationChanged.listen((location_.LocationData newLoc) {
-      setState(() {
-        currentLocation = newLoc;
-      });
+    locationSubscription = location.onLocationChanged.listen((newLoc) {
+      setState(() => currentLocation = newLoc);
     });
   }
 
@@ -188,188 +131,186 @@ Future<Position> _getCurrentLocation() async {
     }
   }
 
-  void _onCameraMove(CameraPosition position) {
-    // تحديث مكان الدبوس عند تحريك الكاميرا
-    setState(() {
-      userLocationMarker = LatLng(position.target.latitude, position.target.longitude);
-    });
+  void _onSearchChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () => _getSuggestions(value));
   }
 
-  void _onCameraIdle() {
-    // تحديث العنوان عند توقف الكاميرا
-    _updateAddress(userLocationMarker.latitude, userLocationMarker.longitude);
-  }
+  Future<void> _getSuggestions(String input) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${Uri.encodeComponent(input)}&language=ar&components=country:sa&key=$googleMapsApiKey');
 
-  void _goToCurrentLocation() async {
-  final GoogleMapController controller = await _controller.future;
-
-  // تحقق من أن currentLocation ليست null
-  if (currentLocation != null) {
-    controller.animateCamera(CameraUpdate.newLatLngZoom(
-      LatLng(currentLocation!.latitude!, currentLocation!.longitude!),
-      16,
-    ));
-  } else {
-    // يمكنك إضافة معالجة في حالة كان currentLocation null
-    print("الموقع الحالي غير متاح");
-  }
-}
-
-  void _confirmAddress() {
-    setState(() {
-      addressText = addressController.text;
-    });
-    print('تم تأكيد العنوان: $addressText');
-    saveAddress(addressController.text, userLocationMarker.latitude, userLocationMarker.longitude);
-  }
-
-  Future<void> saveAddress(String addressLine, double latitude, double longitude) async {
-    final url = APIConfig.addressesEndpoint;
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userid');  
-    
-    if (userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('لا يوجد مستخدم مسجل.'),
-        ),
-      );
-      return;
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        placeSuggestions = data['predictions'];
+      });
     }
+  }
 
-    try {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('جاري حفظ العنوان...'),
-        ),
-      );
+  Future<void> _selectSuggestion(String placeId) async {
+    final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&language=ar&key=$googleMapsApiKey');
 
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'address_line': addressLine,
-          'x_map': latitude,
-          'y_map': longitude,
-          'user': userId,
-        }),
-      );
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final location = data['result']['geometry']['location'];
+      final lat = location['lat'];
+      final lng = location['lng'];
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('تم حفظ العنوان بنجاح'),
-          ),
-        );
+      final controller = await _controller.future;
+      controller.animateCamera(CameraUpdate.newLatLngZoom(LatLng(lat, lng), 16));
 
-        await Future.delayed(Duration(seconds: 2));
-        Navigator.pop(context);  
-      } else {
-        print('فشل في حفظ العنوان');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('فشل في حفظ العنوان'),
-          ),
-        );
-      }
-    } catch (e) {
-      print('خطأ في الاتصال بالخادم: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('حدث خطأ في الاتصال بالخادم.'),
-        ),
-      );
+      setState(() {
+        userLocationMarker = LatLng(lat, lng);
+        placeSuggestions.clear();
+      });
+
+      _updateAddress(lat, lng);
     }
   }
 
   @override
   void dispose() {
-    // Check if locationSubscription is initialized before cancelling it
-    if (locationSubscription != null) {
-      locationSubscription!.cancel();  
-    }
+    locationSubscription?.cancel();
+    _debounce?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: const Text("تحديد الموقع")),
-      body: userLocationMarker.latitude == 0.0 && userLocationMarker.longitude == 0.0
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Expanded(
-                  child: GoogleMap(
-                    mapType: MapType.normal,
-                    initialCameraPosition: CameraPosition(
-                      target: userLocationMarker,
-                      zoom: 16,
+      body: SafeArea(
+        child: userLocationMarker.latitude == 0.0 && userLocationMarker.longitude == 0.0
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: searchController,
+                            decoration: InputDecoration(
+                              hintText: 'ابحث عن موقع...',
+                              suffixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: _onSearchChanged,
+                          ),
+                          if (placeSuggestions.isNotEmpty)
+                            Container(
+                              height: 200,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: placeSuggestions.length,
+                                itemBuilder: (context, index) {
+                                  return ListTile(
+                                    title: Text(placeSuggestions[index]['description']),
+                                    onTap: () => _selectSuggestion(placeSuggestions[index]['place_id']),
+                                  );
+                                },
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId("userLocation"),
-                        position: userLocationMarker,
-                        icon: customMarker,
-                        draggable: false,
-                      ),
-                    },
-                    onMapCreated: (controller) {
-                      _controller.complete(controller);
-                      mapController = controller;
-                    },
-                    onCameraMove: _onCameraMove,
-                    onCameraIdle: _onCameraIdle,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(6.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "العنوان:",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      TextField(
-                        controller: addressController,
-                        decoration: const InputDecoration(
-                          hintText: "أدخل العنوان هنا",
-                          border: OutlineInputBorder(),
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.45,
+                      child: GoogleMap(
+                        mapType: MapType.normal,
+                        initialCameraPosition: CameraPosition(
+                          target: userLocationMarker,
+                          zoom: 16,
                         ),
-                        maxLines: 3,
+                        markers: {
+                          Marker(
+                            markerId: const MarkerId("userLocation"),
+                            position: userLocationMarker,
+                            icon: customMarker,
+                            draggable: false,
+                          ),
+                        },
+                        onMapCreated: (controller) {
+                          _controller.complete(controller);
+                          mapController = controller;
+                        },
+                        onCameraMove: (position) => userLocationMarker = position.target,
+                        onCameraIdle: () => _updateAddress(userLocationMarker.latitude, userLocationMarker.longitude),
                       ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        
-                        onPressed: _confirmAddress,
-                        child: Text("تأكيد العنوان"),
-                        style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
-                          minimumSize: Size(double.infinity, 50),
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                        ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextField(
+                            controller: addressController,
+                            decoration: const InputDecoration(hintText: "أدخل العنوان هنا", border: OutlineInputBorder()),
+                            maxLines: 3,
+                          ),
+                          SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => saveAddress(addressController.text, userLocationMarker.latitude, userLocationMarker.longitude),
+                            child: Text("تأكيد العنوان"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primaryColor,
+                              minimumSize: Size(double.infinity, 50),
+                              padding: EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(left: 16.0, bottom: 210.0),
         child: Align(
           alignment: Alignment.bottomLeft,
           child: FloatingActionButton(
             onPressed: _goToCurrentLocation,
-            backgroundColor:primaryColor,
-            child: Icon(
-              Icons.my_location,
-              color: Colors.white),
+            backgroundColor: primaryColor,
+            child: Icon(Icons.my_location, color: Colors.white),
           ),
         ),
       ),
     );
+  }
+
+  void _goToCurrentLocation() async {
+    final controller = await _controller.future;
+    if (currentLocation != null) {
+      controller.animateCamera(CameraUpdate.newLatLngZoom(
+          LatLng(currentLocation!.latitude!, currentLocation!.longitude!), 16));
+    }
+  }
+
+  Future<void> saveAddress(String addressLine, double latitude, double longitude) async {
+    final url = APIConfig.addressesEndpoint;
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userid');
+
+    if (userId == null) return;
+
+    await http.post(Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'address_line': addressLine,
+          'x_map': latitude,
+          'y_map': longitude,
+          'user': userId,
+        }));
+
+    Navigator.pop(context);
   }
 }

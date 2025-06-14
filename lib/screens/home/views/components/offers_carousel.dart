@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shop/components/Banner/M/banner_m_style_1.dart';
-import 'package:shop/components/dot_indicators.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:melaq/components/Banner/M/banner_m_style_1.dart';
+import 'package:melaq/components/dot_indicators.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 
 import '../../../../constants.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop/constants.dart';
+import 'package:melaq/constants.dart';
 
 /// مكون مخصص للرسائل والإشعارات في التطبيق
 /// يدعم أنواع مختلفة من الرسائل: نجاح، خطأ، تحذير، معلومات

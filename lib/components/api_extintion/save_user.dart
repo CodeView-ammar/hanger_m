@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/route/route_constants.dart';
+import 'package:melaq/route/route_constants.dart';
 
 class GetUser {
   // Method to check if the user is found in SharedPreferences

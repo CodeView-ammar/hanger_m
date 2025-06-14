@@ -8,7 +8,7 @@ library moyasar_payment;
 import 'dart:convert';
 // import 'package:flutter_pay/flutter_pay.dart';
 import 'package:http/http.dart' as http;
-import 'package:shop/screens/checkout/tools/model/paymodel.dart';
+import 'package:melaq/screens/checkout/tools/model/paymodel.dart';
 import './flutter_pay.dart';
 
 class MoyasarPayment {

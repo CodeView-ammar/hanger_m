@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/route/route_constants.dart';
-import 'package:shop/route/router.dart' as router;
-import 'package:shop/theme/app_theme.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/route/route_constants.dart';
+import 'package:melaq/route/router.dart' as router;
+import 'package:melaq/theme/app_theme.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:flutter_gen/gen_l10n/app_localizations.dart';

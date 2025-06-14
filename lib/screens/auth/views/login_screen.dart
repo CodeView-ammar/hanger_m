@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shop/components/api_extintion/otp_api.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/screens/auth/views/otp_screen.dart';
-import 'package:shop/screens/auth/views/privacy_policy.dart'; // استيراد شاشة سياسة الخصوصية
+import 'package:melaq/components/api_extintion/otp_api.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/screens/auth/views/otp_screen.dart';
+import 'package:melaq/screens/auth/views/privacy_policy.dart'; // استيراد شاشة سياسة الخصوصية
 import 'components/login_form.dart';
 
 class LoginScreen extends StatefulWidget {

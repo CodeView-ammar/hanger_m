@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/network_image_with_loader.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/screens/auth/views/login_screen.dart';
-import 'package:shop/screens/profile/views/profile_screen.dart';
+import 'package:melaq/components/network_image_with_loader.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/screens/auth/views/login_screen.dart';
+import 'package:melaq/screens/profile/views/profile_screen.dart';
 
 import '../../../../constants.dart';
 

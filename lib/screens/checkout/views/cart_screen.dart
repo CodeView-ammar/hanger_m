@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 import 'package:http/http.dart' as http;
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/screens/checkout/views/review_order.dart';
-import 'package:shop/screens/home/views/components/best_sellers.dart';
-import 'package:shop/screens/product/views/product_details_screen.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/screens/checkout/views/review_order.dart';
+import 'package:melaq/screens/home/views/components/best_sellers.dart';
+import 'package:melaq/screens/product/views/product_details_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});

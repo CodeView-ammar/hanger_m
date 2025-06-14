@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:location/location.dart' as loc;
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MapScreen extends StatefulWidget {
@@ -22,16 +23,20 @@ class _MapScreenState extends State<MapScreen> {
   Map<PolylineId, Polyline> polylines = {};
   PolylinePoints polylinePoints = PolylinePoints();
   loc.LocationData? _currentPosition;
-  LatLng curLocation = LatLng(21.501329816000474, 39.167817689383426);
+  LatLng curLocation = const LatLng(0.0, 0.0);
   Marker? sourcePosition, destinationPosition;
   StreamSubscription<loc.LocationData>? locationSubscription;
   late BitmapDescriptor customMarker;
+
   @override
   void initState() {
     super.initState();
-    getNavigation();
-    _loadCustomMarker();
-    addMarker();
+    _loadCustomMarker().then((_) {
+      _getInitialLocationFromPrefs().then((_) {
+        addMarker(); // marker مبدئي من SharedPreferences
+        getNavigation(); // الاشتراك في تتبع الموقع
+      });
+    });
   }
 
   @override
@@ -39,19 +44,128 @@ class _MapScreenState extends State<MapScreen> {
     locationSubscription?.cancel();
     super.dispose();
   }
+
+  /// تحميل أيقونة مخصصة للموقع
   Future<void> _loadCustomMarker() async {
     customMarker = await BitmapDescriptor.fromAssetImage(
-      ImageConfiguration(size: Size(38, 38)),
+      const ImageConfiguration(size: Size(38, 38)),
       'assets/icons/pin.png',
     );
+  }
+
+  /// تحميل الموقع المحفوظ من SharedPreferences
+  Future<void> _getInitialLocationFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lat = prefs.getDouble('latitude');
+      final lng = prefs.getDouble('longitude');
+      if (lat != null && lng != null) {
+        setState(() {
+          curLocation = LatLng(lat, lng);
+        });
+      }
+    } catch (e) {
+      print('Error loading location from prefs: $e');
+    }
+  }
+
+  /// الاشتراك في تحديثات الموقع وإظهار الطريق
+  Future<void> getNavigation() async {
+    final controller = await _controller.future;
+    final location = loc.Location();
+    location.changeSettings(accuracy: loc.LocationAccuracy.high);
+
+    bool serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) return;
+    }
+
+    var permission = await location.hasPermission();
+    if (permission == loc.PermissionStatus.denied) {
+      permission = await location.requestPermission();
+      if (permission != loc.PermissionStatus.granted) return;
+    }
+
+    if (permission == loc.PermissionStatus.granted) {
+      _currentPosition = await location.getLocation();
+      curLocation = LatLng(_currentPosition!.latitude!, _currentPosition!.longitude!);
+
+      locationSubscription = location.onLocationChanged.listen((loc.LocationData currentLocation) {
+        final newLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: newLocation,
+          zoom: 16,
+        )));
+        setState(() {
+          curLocation = newLocation;
+          sourcePosition = Marker(
+            markerId: const MarkerId('source'),
+            icon: customMarker,
+            position: curLocation,
+          );
+        });
+        getDirections(LatLng(widget.latitude, widget.longitude));
+      });
+    }
+  }
+
+  /// استعلام المسار بين نقطتين
+  Future<void> getDirections(LatLng dst) async {
+    List<LatLng> polylineCoordinates = [];
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      APIConfig.apiMap,
+      PointLatLng(curLocation.latitude, curLocation.longitude),
+      PointLatLng(dst.latitude, dst.longitude),
+      travelMode: TravelMode.driving,
+    );
+
+    if (result.points.isNotEmpty) {
+      for (var point in result.points) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      }
+      addPolyLine(polylineCoordinates);
+    } else {
+      print("Polyline error: ${result.errorMessage}");
+    }
+  }
+
+  /// رسم خط المسار
+  void addPolyLine(List<LatLng> polylineCoordinates) {
+    final id = PolylineId('poly');
+    final polyline = Polyline(
+      polylineId: id,
+      color: Colors.blue,
+      points: polylineCoordinates,
+      width: 5,
+    );
+    setState(() {
+      polylines[id] = polyline;
+    });
+  }
+
+  /// إضافة العلامتين للمصدر والوجهة
+  void addMarker() {
+    setState(() {
+      sourcePosition = Marker(
+        markerId: const MarkerId('source'),
+        position: curLocation,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+      );
+      destinationPosition = Marker(
+        markerId: const MarkerId('destination'),
+        position: LatLng(widget.latitude, widget.longitude),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("مسار المغسلة")),
-      body: sourcePosition == null
-          ? Center(child: CircularProgressIndicator())
+      body: sourcePosition == null || destinationPosition == null
+          ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
                 GoogleMap(
@@ -66,119 +180,32 @@ class _MapScreenState extends State<MapScreen> {
                     _controller.complete(controller);
                   },
                 ),
-               
                 Positioned(
                   bottom: 10,
                   right: 10,
                   child: Container(
                     width: 50,
                     height: 50,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.blue,
                     ),
-                    child: Center(
-                      child: IconButton(
-                        icon: Icon(Icons.navigation_outlined, color: Colors.white),
-                        onPressed: () async {
-                          await launchUrl(Uri.parse(
-                              'google.navigation:q=${widget.latitude},${widget.longitude}&key=${APIConfig.apiMap}'));
-                        },
-                      ),
+                    child: IconButton(
+                      icon: const Icon(Icons.navigation_outlined, color: Colors.white),
+                      onPressed: () async {
+                        final url = Uri.parse(
+                            'google.navigation:q=${widget.latitude},${widget.longitude}&key=${APIConfig.apiMap}');
+                        if (await canLaunchUrl(url)) {
+                          await launchUrl(url);
+                        } else {
+                          print('Cannot launch Google Maps');
+                        }
+                      },
                     ),
                   ),
                 ),
               ],
             ),
     );
-  }
-
-  getNavigation() async {
-    final GoogleMapController? controller = await _controller.future;
-    loc.Location location = loc.Location();
-    location.changeSettings(accuracy: loc.LocationAccuracy.high);
-    
-    bool _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-
-    loc.PermissionStatus _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == loc.PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != loc.PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    if (_permissionGranted == loc.PermissionStatus.granted) {
-      _currentPosition = await location.getLocation();
-      curLocation = LatLng(_currentPosition!.latitude!, _currentPosition!.longitude!);
-      
-      locationSubscription = location.onLocationChanged.listen((loc.LocationData currentLocation) {
-        controller?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-          target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
-          zoom: 16,
-        )));
-        setState(() {
-          curLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-          sourcePosition = Marker(
-            markerId: MarkerId('source'),
-            icon: customMarker,
-            position: curLocation,
-            // icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-          );
-          getDirections(LatLng(widget.latitude, widget.longitude)); // استخدام الموقع المرسل كوجهة
-        });
-      });
-    }
-  }
-
-  getDirections(LatLng dst) async {
-    List<LatLng> polylineCoordinates = [];
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      APIConfig.apiMap,  // استخدم مفتاح API هنا
-      PointLatLng(curLocation.latitude, curLocation.longitude),
-      PointLatLng(dst.latitude, dst.longitude),
-      travelMode: TravelMode.driving,
-    );
-    if (result.points.isNotEmpty) {
-      result.points.forEach((PointLatLng point) {
-        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
-      });
-      addPolyLine(polylineCoordinates);
-    } else {
-      print("Error: ${result.errorMessage}");
-    }
-  }
-
-  addPolyLine(List<LatLng> polylineCoordinates) {
-    PolylineId id = PolylineId('poly');
-    Polyline polyline = Polyline(
-      polylineId: id,
-      color: Colors.blue, // اللون الأزرق
-      points: polylineCoordinates,
-      width: 5,
-    );
-    polylines[id] = polyline;
-    setState(() {});
-  }
-
-  addMarker() {
-    setState(() {
-      sourcePosition = Marker(
-        markerId: MarkerId('source'),
-        position: curLocation,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-      );
-      destinationPosition = Marker(
-        markerId: MarkerId('destination'),
-        position: LatLng(widget.latitude, widget.longitude), // الوجهة هي النقطة المرسلة
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan),
-      );
-    });
   }
 }

@@ -3,12 +3,12 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/components/cart_button.dart';
-import 'package:shop/components/custom_modal_bottom_sheet.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/route/route_constants.dart';
-import 'package:shop/screens/product/views/added_to_cart_message_screen.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/components/cart_button.dart';
+import 'package:melaq/components/custom_modal_bottom_sheet.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/route/route_constants.dart';
+import 'package:melaq/screens/product/views/added_to_cart_message_screen.dart';
 import '../../../constants.dart';
 import 'components/product_quantity.dart';
 import 'components/unit_price.dart';
@@ -23,7 +23,7 @@ class SubService {
   factory SubService.fromJson(Map<String, dynamic> json) {
     return SubService(
       id: json['id'],
-      name: utf8.decode(json['name'].codeUnits) ,
+      name: utf8.decode(json['name'].codeUnits),
       price: double.parse(json['price']),
     );
   }
@@ -61,12 +61,12 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
   int _quantity = 1;
   String _serviceType = 'عادية';
   List<SubService> _subServices = [];
-  List<SubService> _selectedSubServices = []; // قائمة لاختيار الخدمات الفرعية
+  List<SubService> _selectedSubServices = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchSubServices(); // Fetch sub-services on init
+    _fetchSubServices();
   }
 
   Future<void> _fetchSubServices() async {
@@ -79,17 +79,9 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
         setState(() {
           _subServices = data.map((json) => SubService.fromJson(json)).toList();
         });
-      } else {
-        // Handle error
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text('فشل في جلب الخدمات الفرعية!')),
-        // );
       }
     } catch (e) {
-      // Handle connection error
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(content: Text('حدث خطأ في الاتصال!')),
-      // );
+      // Handle error
     }
   }
 
@@ -102,17 +94,19 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
       return;
     }
 
-    double totalSubServicePrice = _selectedSubServices.fold(0, (sum, item) => sum + item.price);
-    double selectedPrice = totalSubServicePrice + (widget.servicePrice * _quantity);
-    String tServicetype = (_serviceType == 'مستعجلة') ? 'urgent' : 'normal';
+    // تحديد السعر حسب نوع الخدمة
+    final basePrice = _serviceType == 'مستعجلة' 
+        ? widget.serveiceUrgentPrice 
+        : widget.servicePrice;
 
-    final url = APIConfig.CartsEndpoint;
+    final totalSubServicePrice = _selectedSubServices.fold(0.0, (sum, item) => sum + item.price);
+    final selectedPrice = totalSubServicePrice + (basePrice * _quantity);
+    final tServicetype = _serviceType == 'مستعجلة' ? 'urgent' : 'normal';
+
     try {
       final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        Uri.parse(APIConfig.CartsEndpoint),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'price': selectedPrice,
           'urgent_price': widget.serveiceUrgentPrice,
@@ -121,7 +115,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
           'laundry': widget.laundry,
           'service': widget.serviceId,
           'service_type': tServicetype,
-          'sub_service_ids': _selectedSubServices.map((s) => s.id).toList(), // إرسال قائمة الخدمات الفرعية المختارة
+          'sub_service_ids': _selectedSubServices.map((s) => s.id).toList(),
         }),
       );
 
@@ -133,40 +127,51 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('فشل في إضافة المنتج إلى السلة!')),
+          const SnackBar(content: Text('فشل في إضافة المنتج إلى السلة!')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('حدث خطأ في الاتصال!')),
+        const SnackBar(content: Text('حدث خطأ في الاتصال!')),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    double totalPrice = (widget.servicePrice * _quantity) + _selectedSubServices.fold(0, (sum, item) => sum + item.price);
+    // تحديد السعر الأساسي بناءً على نوع الخدمة
+    final basePrice = _serviceType == 'مستعجلة' 
+        ? widget.serveiceUrgentPrice 
+        : widget.servicePrice;
+
+    final totalPrice = (basePrice * _quantity) + 
+        _selectedSubServices.fold(0, (sum, item) => sum + item.price);
 
     return Scaffold(
       bottomNavigationBar: CartButton(
         price: totalPrice,
         title: "اضافة للسلة",
         subTitle: "الإجمالي",
-        press: () {
-          _addToCart();
-        },
+        press: _addToCart,
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: defaultPadding / 2, vertical: defaultPadding),
+            padding: const EdgeInsets.symmetric(
+              horizontal: defaultPadding / 2, 
+              vertical: defaultPadding
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const BackButton(),
                 Text(
                   widget.serviceName,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: const TextStyle(
+                    fontSize: 16, 
+                    fontWeight: FontWeight.bold, 
+                    color: Colors.black
+                  ),
                 ),
                 const SizedBox(width: 18),
               ],
@@ -184,91 +189,73 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
-                              child: UnitPrice(price: totalPrice),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  UnitPrice(price: totalPrice),
+                                  if (_serviceType == 'مستعجلة')
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Text(
+                                        '(+${(widget.serveiceUrgentPrice - widget.servicePrice).toStringAsFixed(1)} للخدمة المستعجلة)',
+                                        style: const TextStyle(
+                                          color: Colors.red,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                             ProductQuantity(
                               numOfItem: _quantity,
-                              onIncrement: () {
-                                setState(() {
-                                  _quantity++;
-                                });
-                              },
-                              onDecrement: () {
-                                setState(() {
-                                  if (_quantity > 1) {
-                                    _quantity--;
-                                  }
-                                });
-                              },
+                              onIncrement: () => setState(() => _quantity++),
+                              onDecrement: () => setState(() {
+                                if (_quantity > 1) _quantity--;
+                              }),
                             ),
                           ],
                         ),
                         const SizedBox(height: defaultPadding),
-                        // اختيار نوع الخدمة
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(AppLocalizations.of(context)!.servicetype, style: Theme.of(context).textTheme.bodyLarge),
-                            ListTile(
-                              title: Text(AppLocalizations.of(context)!.normal),
-                              leading: Transform.scale(
-                                scale: 1.5,
-                                child: Checkbox(
-                                  value: _serviceType == 'عادية',
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _serviceType = 'عادية';
-                                      _selectedSubServices.clear(); // إعادة تعيين اختيار الخدمات الفرعية
-                                    });
-                                  },
-                                ),
-                              ),
+                            Text(
+                              AppLocalizations.of(context)!.servicetype,
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
-                            ListTile(
-                              title: Text(AppLocalizations.of(context)!.urgent),
-                              leading: Transform.scale(
-                                scale: 1.5,
-                                child: Checkbox(
-                                  value: _serviceType == 'مستعجلة',
-                                  onChanged: (bool? value) {
-                                    setState(() {
-                                      _serviceType = 'مستعجلة';
-                                      _selectedSubServices.clear(); // إعادة تعيين اختيار الخدمات الفرعية
-                                    });
-                                  },
-                                ),
-                              ),
+                            _buildServiceTypeTile(
+                              title: AppLocalizations.of(context)!.normal,
+                              price: widget.servicePrice,
+                              isSelected: _serviceType == 'عادية',
+                              onTap: () => setState(() {
+                                _serviceType = 'عادية';
+                                _selectedSubServices.clear();
+                              }),
+                            ),
+                            _buildServiceTypeTile(
+                              title: AppLocalizations.of(context)!.urgent,
+                              price: widget.serveiceUrgentPrice,
+                              isSelected: _serviceType == 'مستعجلة',
+                              onTap: () => setState(() {
+                                _serviceType = 'مستعجلة';
+                                _selectedSubServices.clear();
+                              }),
                             ),
                           ],
                         ),
                         const SizedBox(height: defaultPadding),
-                        // عرض الخدمات الفرعية كصناديق اختيار
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(AppLocalizations.of(context)!.subService, style: Theme.of(context).textTheme.bodyLarge),
-                            ..._subServices.map((subService) {
-                              return ListTile(
-                                title: Text(subService.name),
-                                leading: Transform.scale(
-                                  scale: 1.5,
-                                  child: Checkbox(
-                                    value: _selectedSubServices.contains(subService),
-                                    onChanged: (bool? value) {
-                                      setState(() {
-                                        if (value == true) {
-                                          _selectedSubServices.add(subService);
-                                        } else {
-                                          _selectedSubServices.remove(subService);
-                                        }
-                                      });
-                                    },
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ],
-                        ),
+                        if (_subServices.isNotEmpty)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context)!.subService,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              ..._subServices.map(_buildSubServiceItem).toList(),
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -279,6 +266,63 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildServiceTypeTile({
+    required String title,
+    required double price,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      title: Row(
+        children: [
+          Text(title),
+          const SizedBox(width: 8),
+          Text(
+            '${price.toStringAsFixed(1)} ر.س',
+            style: TextStyle(
+              color: isSelected ? Colors.green : Colors.grey.shade600,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+      leading: Transform.scale(
+        scale: 1.5,
+        child: Checkbox(
+          value: isSelected,
+          onChanged: (bool? value) => onTap(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubServiceItem(SubService subService) {
+    return ListTile(
+      title: Text(subService.name),
+      trailing: Text(
+        '${subService.price.toStringAsFixed(1)} ر.س',
+        style: TextStyle(
+          color: _selectedSubServices.contains(subService)
+              ? primaryColor
+              : Colors.grey.shade600,
+        ),
+      ),
+      leading: Transform.scale(
+        scale: 1.5,
+        child: Checkbox(
+          value: _selectedSubServices.contains(subService),
+          onChanged: (bool? value) => setState(() {
+            if (value == true) {
+              _selectedSubServices.add(subService);
+            } else {
+              _selectedSubServices.remove(subService);
+            }
+          }),
+        ),
       ),
     );
   }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 import 'package:http/http.dart' as http;
 Future<void> addTransaction(
     String debitorcredit,

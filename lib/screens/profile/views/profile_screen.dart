@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shop/components/list_tile/divider_list_tile.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/l10n/language_helper.dart';
-import 'package:shop/main.dart';
-import 'package:shop/route/screen_export.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/components/list_tile/divider_list_tile.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/l10n/language_helper.dart';
+import 'package:melaq/main.dart';
+import 'package:melaq/route/screen_export.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 import 'components/profile_card.dart';
 import 'components/profile_menu_item_list_tile.dart';
 
+late BuildContext _context;
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+
 
   Future<String> getUserPhoneNumber() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -38,7 +42,30 @@ class ProfileScreen extends StatelessWidget {
       RestartWidget.restartApp(context);
     }
   }
+Future<bool> deleteUser() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var userId = await prefs.getString('userid');
 
+  if (userId == null) {
+
+    return false;
+  }
+
+  final response = await http.delete(
+    Uri.parse('${APIConfig.useraddEndpoint}$userId/'),
+  );
+
+  // تحقق أن الواجهة لا تزال فعالة بعد await
+  
+  if (response.statusCode == 204) {
+    return true;
+  } else {
+    return false;
+    }
+  
+}
+
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -409,6 +436,10 @@ class ProfileScreen extends StatelessWidget {
                                           ),
                                           child: const Text("تسجيل الخروج"),
                                         ),
+                                        
+                                    
+
+
                                       ],
                                     ),
                                   );
@@ -441,7 +472,68 @@ class ProfileScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        
+                          SliverToBoxAdapter(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: defaultPadding, vertical: defaultPadding),
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                // عرض تأكيد الحذف
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (context) => AlertDialog(
+                                                    title: const Text("تأكيد حذف الحساب"),
+                                                    content: const Text("هل أنت متأكد أنك تريد حذف الحساب؟ هذا الإجراء لا يمكن التراجع عنه."),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () => Navigator.pop(context), // إلغاء
+                                                        child: const Text("إلغاء"),
+                                                      ),
+                                                      TextButton(
+                                                       onPressed: () async {
+                                                        bool isDeleted = await deleteUser();
+
+                                                          Navigator.pop(context);
+                                                        if (isDeleted) {
+                                                          // if (context.mounted) return;
+                                                          Navigator.pushNamedAndRemoveUntil(
+                                                            context,
+                                                            logInScreenRoute,
+                                                            (route) => false,
+                                                          );
+
+                                                          ScaffoldMessenger.of(context).showSnackBar(
+                                                            SnackBar(content: Text('تم حذف الحساب بنجاح')),
+                                                          );
+                                                        } else {
+                                                          if (context.mounted) {
+                                                            ScaffoldMessenger.of(context).showSnackBar(
+                                                              SnackBar(content: Text('فشل حذف الحساب')),
+                                                            );
+                                                          }
+                                                        }
+                                                      },
+
+                                                        style: TextButton.styleFrom(
+                                                          foregroundColor: errorColor,
+                                                        ),
+                                                        child: const Text("حذف الحساب"),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                              child: const Text("حذف الحساب"),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red, // لون الزر
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
                         // معلومات التطبيق
                         SliverToBoxAdapter(
                           child: Center(
@@ -451,7 +543,7 @@ class ProfileScreen extends StatelessWidget {
                                 top: 8,
                               ),
                               child: Text(
-                                "نسخة التطبيق: 1.0.0",
+                                "نسخة التطبيق: 2.0.5",
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 12,

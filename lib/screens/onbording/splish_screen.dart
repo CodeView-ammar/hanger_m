@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/route/route_constants.dart';
-import 'package:shop/screens/onbording/sub_main.dart';
-import 'package:shop/screens/onbording/views/onbording_screnn.dart'; // تأكد من المسار الصحيح
+import 'package:melaq/constants.dart';
+import 'package:melaq/route/route_constants.dart';
+import 'package:melaq/screens/onbording/sub_main.dart';
+import 'package:melaq/screens/onbording/views/onbording_screnn.dart'; // تأكد من المسار الصحيح
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -68,14 +68,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "مرحبًا بك في التطبيق!",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              
             ],
           ),
         ),

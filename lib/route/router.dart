@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shop/entry_point.dart';
-import 'package:shop/screens/help/views/instructions_screen.dart';
-import 'package:shop/screens/onbording/splish_screen.dart';
-import 'package:shop/screens/onbording/sub_main.dart';
-import 'package:shop/screens/user_info/views/edit_user_info_screen.dart';
+import 'package:melaq/entry_point.dart';
+import 'package:melaq/screens/help/views/instructions_screen.dart';
+import 'package:melaq/screens/onbording/splish_screen.dart';
+import 'package:melaq/screens/onbording/sub_main.dart';
+import 'package:melaq/screens/user_info/views/edit_user_info_screen.dart';
 
 import 'screen_export.dart';
 

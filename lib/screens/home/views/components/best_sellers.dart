@@ -2,12 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/models/product_model.dart';
-import 'package:shop/route/route_constants.dart';
-import 'package:shop/screens/home/views/components/location_service.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/models/product_model.dart';
+import 'package:melaq/route/route_constants.dart';
+import 'package:melaq/screens/home/views/components/location_service.dart';
 class BestSellers extends StatefulWidget {
   const BestSellers({Key? key}) : super(key: key);
 
@@ -452,7 +452,7 @@ Widget _buildProductList(List<ProductModel> products) {
                                 ),
                                 child: Text(
                                   'غير متوفر',
-                                  style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                                  style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                                 ),
                               );
                             }

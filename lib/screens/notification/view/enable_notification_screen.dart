@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shop/main.dart';
+import 'package:melaq/main.dart';
 
 class EnableNotificationScreen extends StatelessWidget {
   const EnableNotificationScreen({super.key});

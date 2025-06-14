@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop/chcek_connect.dart';
+import 'package:melaq/chcek_connect.dart';
 import 'components/best_sellers.dart';
 import 'components/offer_carousel_and_categories.dart';
 

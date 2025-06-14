@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shop/route/route_constants.dart';
-import 'package:shop/screens/user_info/views/edit_user_info_screen.dart';
+import 'package:melaq/route/route_constants.dart';
+import 'package:melaq/screens/user_info/views/edit_user_info_screen.dart';
 
 class UserInfoScreen extends StatelessWidget {
   const UserInfoScreen({super.key});

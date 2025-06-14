@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shop/components/widgets/animated_progress_line.dart';
+import 'package:melaq/components/widgets/animated_progress_line.dart';
 import 'dart:math' as math;
 
-import 'package:shop/constants.dart';
+import 'package:melaq/constants.dart';
 
 enum OrderProcessStatus { done, processing, notDoneYeat, error, canceled }
 

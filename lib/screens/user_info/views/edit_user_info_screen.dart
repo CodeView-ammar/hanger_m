@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';  // حزمة لاختيار الصور من الجهاز
 import 'dart:io';
 
-import 'package:shop/components/api_extintion/otp_api.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/screens/auth/views/otp_screen.dart'; // لاستعراض الصور المحفوظة على الجهاز
+import 'package:melaq/components/api_extintion/otp_api.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/screens/auth/views/otp_screen.dart'; // لاستعراض الصور المحفوظة على الجهاز
 
 class EditUserInfoScreen extends StatefulWidget {
   const EditUserInfoScreen({super.key});

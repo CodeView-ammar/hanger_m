@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop/constants.dart';
+import 'package:melaq/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HelpScreen extends StatefulWidget {

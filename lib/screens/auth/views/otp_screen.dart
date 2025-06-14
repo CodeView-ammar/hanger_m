@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shop/components/api_extintion/otp_api.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/components/custom_messages.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/route/route_constants.dart';
+import 'package:melaq/components/api_extintion/otp_api.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/components/custom_messages.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/route/route_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
@@ -206,10 +206,10 @@ class _VerifyOTPScreenState extends State<VerifyOTPScreen> with WidgetsBindingOb
   void _onFullOtpChanged() {
     String fullOtp = _fullOtpController.text;
     if (fullOtp.length == 4) {
-      _otpController1.text = fullOtp[0];
-      _otpController2.text = fullOtp[1];
-      _otpController3.text = fullOtp[2];
       _otpController4.text = fullOtp[3];
+      _otpController3.text = fullOtp[2];
+      _otpController2.text = fullOtp[1];
+      _otpController1.text = fullOtp[0];
     }
   }
   

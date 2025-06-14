@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/screens/wallet/views/components/wallet_service.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/screens/wallet/views/components/wallet_service.dart';
 import 'components/wallet_balance_card.dart';
 import 'components/wallet_history_card.dart';
 

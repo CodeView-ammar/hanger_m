@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shop/constants.dart';
+import 'package:melaq/constants.dart';
 
 class DelegateNoteScreen extends StatelessWidget {
   const DelegateNoteScreen({Key? key}) : super(key: key);

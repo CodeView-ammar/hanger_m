@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 import 'dart:convert'; // لاستخدام json.decode
-import 'package:shop/constants.dart';
-import 'package:shop/l10n/app_localizations.dart';
-import 'package:shop/l10n/language_helper.dart';
-import 'package:shop/route/screen_export.dart';
-import 'package:shop/components/order_process.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/l10n/language_helper.dart';
+import 'package:melaq/route/screen_export.dart';
+import 'package:melaq/components/order_process.dart';
 
 class EntryPoint extends StatefulWidget {
   const EntryPoint({super.key});

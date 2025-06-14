@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shop/components/api_extintion/url_api.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
 
 class AuthService {
   final String apiUrl_verifyOTP = APIConfig.otpapiverifyEndpoint; // تأكد من أن هذا هو URL الصحيح للتحقق

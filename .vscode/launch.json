@@ -5,18 +5,18 @@
     "version": "1.2.0",
     "configurations": [
         {
-            "name": "hanger_m",
+            "name": "melaq",
             "request": "launch",
             "type": "dart"
         },
         {
-            "name": "hanger_m (profile mode)",
+            "name": "melaq (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "hanger_m (release mode)",
+            "name": "melaq (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

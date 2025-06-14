@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/screens/checkout/views/cart_screen.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/screens/checkout/views/cart_screen.dart';
 
 class AddedToCartMessageScreen extends StatelessWidget {
   final int laundryId;  // تحديد النوع كـ final لضمان أنه لا يتغير بعد تمريره

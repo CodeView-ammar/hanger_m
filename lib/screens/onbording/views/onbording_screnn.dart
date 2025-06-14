@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shop/components/dot_indicators.dart';
-import 'package:shop/l10n/language_helper.dart';
-import 'package:shop/constants.dart';
-import 'package:shop/main.dart';
-import 'package:shop/route/route_constants.dart';
+import 'package:melaq/components/dot_indicators.dart';
+import 'package:melaq/l10n/language_helper.dart';
+import 'package:melaq/constants.dart';
+import 'package:melaq/main.dart';
+import 'package:melaq/route/route_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'components/onbording_content.dart';
-import 'package:shop/l10n/app_localizations.dart';
+import 'package:melaq/l10n/app_localizations.dart';
 
 class OnBordingScreen extends StatefulWidget {
   const OnBordingScreen({super.key});

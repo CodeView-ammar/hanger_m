@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shop/l10n/app_localizations.dart';
+import 'package:melaq/l10n/app_localizations.dart';
 
 import '../../../../constants.dart';
 

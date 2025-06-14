@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shop/components/api_extintion/url_api.dart';
-import 'package:shop/components/product/laundries_cart.dart';
+import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/components/product/laundries_cart.dart';
 import 'package:http/http.dart' as http;
-import 'package:shop/route/route_constants.dart';
+import 'package:melaq/route/route_constants.dart';
 import 'dart:convert';
-import 'package:shop/l10n/app_localizations.dart';
+import 'package:melaq/l10n/app_localizations.dart';
 
 import '../../../constants.dart';
 
