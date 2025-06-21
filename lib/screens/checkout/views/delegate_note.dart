@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:melaq/constants.dart';
 
 class DelegateNoteScreen extends StatelessWidget {
-  const DelegateNoteScreen({Key? key}) : super(key: key);
+  const DelegateNoteScreen({Key? key, required String delegateNote}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +26,15 @@ class DelegateNoteScreen extends StatelessWidget {
             TextField(
               controller: noteController,
               maxLines: 5, // عدد الأسطر المسموح بها
-              decoration:const InputDecoration(
-                border: OutlineInputBorder(),
+              key: const ValueKey('noteKey'), // استخدم مفتاحًا فريدًا
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
                 hintText: 'اكتب ملاحظتك هنا...',
+                filled: true, // لملء الخلفية
+                fillColor: Colors.grey[200], // لون خلفية خفيف
+                contentPadding: const EdgeInsets.all(10), // حشو داخلي لراحة الاستخدام
               ),
-            ),
+            ),            
             const SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(

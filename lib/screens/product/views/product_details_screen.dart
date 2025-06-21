@@ -465,7 +465,7 @@ Widget _buildCategoriesSection() {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(),
+        // _buildSectionHeader(),
         const SizedBox(height: 8),
         _buildCategoriesList(),
       ],
@@ -562,7 +562,7 @@ Widget _buildSectionHeader() {
 // 7. ويدجت قائمة التصنيفات
 Widget _buildCategoriesList() {
   return SizedBox(
-    height: 60, // ارتفاع مناسب لجميع الأجهزة
+    height: 50, // ارتفاع مناسب لجميع الأجهزة
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -607,12 +607,12 @@ Widget _buildCategoryItem(CategoryModel category, bool isSelected) {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              _getCategoryIcon(category.name),
-              color: isSelected ? Colors.white : primaryColor,
-              size: 18,
-            ),
-            const SizedBox(width: 8),
+            // Icon(
+            //   _getCategoryIcon(category.name),
+            //   color: isSelected ? Colors.white : primaryColor,
+            //   size: 18,
+            // ),
+            // const SizedBox(width: 8),
             Flexible(
               child: Text(
                 category.name,
