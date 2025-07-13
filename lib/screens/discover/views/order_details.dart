@@ -36,8 +36,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     'courier_on_the_way': 'المندوب في الطريق',
     'picked_up_from_customer': 'تم أخذها من العميل',
     'in_progress': 'جاري التنفيذ',
-    'customer_accepted_end': "التسليم للعميل النهائي",
-    'courier_accepted_end': "التسليم للمندوب النهائي",
+    'delivered_to_customer': "التسليم للعميل النهائي",
+    'delivered_to_courier': "التسليم للمندوب النهائي",
     'courier_received': 'تم تسليم المندوب النهائي',
   };
 
@@ -374,7 +374,7 @@ Future<void> editStatusOrder(String status_) async {
           onPressed: () {
             // هنا يمكنك إضافة الكود لاستلام الطلب
             print('استلام الطلب');
-            editStatusOrder('customer_accepted_end');
+            editStatusOrder('courier_accepted_end');
             
           },
           style: ElevatedButton.styleFrom(

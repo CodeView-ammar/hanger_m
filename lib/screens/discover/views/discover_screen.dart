@@ -146,6 +146,12 @@ String translateStatus(String status) {
 
     case 'courier_received':
       return 'تم استلام الطلب من المندوب النهائي';
+    case 'delivered_to_customer':
+      return "التسليم للعميل النهائي";
+    
+    case 'delivered_to_courier':
+      return "التسليم للمندوب النهائي";
+    
     default:
       return 'حالة غير معروفة';
   }
@@ -175,8 +181,14 @@ IconData getStatusIcon(String status) {
       return Icons.person_add_alt_1;  // شخص مع إضافة
     case 'courier_accepted_end':
       return Icons.delivery_dining;  // توصيل
-     case 'courier_received':
+    case 'courier_received':
       return Icons.assignment_turned_in;  // تم التسليم للمندوب
+    case 'delivered_to_customer':
+      return Icons.assignment_turned_in;
+    
+    case 'delivered_to_courier':
+      return Icons.assignment_turned_in;
+    
     default:
       return Icons.help_outline;  // سؤال
   }
