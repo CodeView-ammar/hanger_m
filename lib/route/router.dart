@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:melaq/entry_point.dart';
-import 'package:melaq/screens/help/views/instructions_screen.dart';
+import '../screens/help/views/help_screen.dart';
+import '../screens/help/views/instructions_screen.dart';
+import '../screens/chat/views/support_chat_screen.dart';
 import 'package:melaq/screens/onbording/splish_screen.dart';
 import 'package:melaq/screens/onbording/sub_main.dart';
 import 'package:melaq/screens/user_info/views/edit_user_info_screen.dart';
@@ -88,9 +90,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         builder: (context) => const WelcomeScreen(),
       );
     case instructionsScreenRoute:
-      return MaterialPageRoute(
-        builder: (context) => const InstructionsScreen(),
-      );
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => const InstructionsScreen(),
+          );
+        case supportChatScreenRoute:
+          return MaterialPageRoute(
+            settings: settings,
+            builder: (context) => const SupportChatScreen(),
+          );
     case passwordRecoveryScreenRoute:
       return MaterialPageRoute(
         builder: (context) => const PasswordRecoveryScreen(),
@@ -135,12 +143,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     //   return MaterialPageRoute(
     //     builder: (context) => const SetupFaceIdScreen(),
     //   );
-    
+
  case productDetailsScreenRoute:
   return MaterialPageRoute(
     builder: (context) {
       final args = settings.arguments as Map<String, dynamic>?;
-     
+
       bool isAvailable = args?["isAvailable"] ?? true; // الافتراضي إلى true إذا لم يتم توفيره
       int id = args?["id"] ?? 0; // الافتراضي إلى 0 إذا لم يتم توفيره
       String name = args?["name"] ?? "";

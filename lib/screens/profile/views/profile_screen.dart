@@ -370,6 +370,14 @@ Future<bool> deleteUser() async {
                                   const SizedBox(height: 12),
                                   
                                   ProfileMenuListTile(
+                                    text: "التواصل مع الدعم الفني",
+                                    svgSrc: "assets/icons/Chat.svg",
+                                    press: () {
+                                      Navigator.pushNamed(context, supportChatScreenRoute);
+                                    },
+                                  ),
+                                  
+                                  ProfileMenuListTile(
                                     text: AppLocalizations.of(context)!.helpandsupport,
                                     svgSrc: "assets/icons/Help.svg",
                                     press: () {
