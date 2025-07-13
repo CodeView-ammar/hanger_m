@@ -82,20 +82,33 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
-  Future<void> editStatusOrder(status_) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString('userid');
-    final orderId = widget.order['id'];
+Future<void> editStatusOrder(String status_) async {
+  final prefs = await SharedPreferences.getInstance();
+  final userId = prefs.getString('userid');
+  final orderId = widget.order['id'];
 
-    Map<String, dynamic> requestData = {
-      'status': status_,
-    };
+  if (userId == null || orderId == null) {
+    print("User ID أو Order ID غير موجود");
+    return;
+  }
 
-    final response = await http.put(
-      Uri.parse('${APIConfig.orderStatusEdit}/$orderId/update-status/'),
-      body: json.encode(requestData),
+  // حدد الرابط الصحيح لنقطة النهاية المستقلة الخاصة بـ customer-receive
+  final url = Uri.parse('${APIConfig.orderStatusEdit}/$orderId/customer-receive/');
+  // محتوى الطلب
+  Map<String, dynamic> requestData = {
+    'user_id': userId,
+    'status': status_, // يمكن حذفه إن لم يكن مطلوبًا
+  };
+
+  try {
+    final response = await http.patch(
+      url,
       headers: {'Content-Type': 'application/json'},
+      body: json.encode(requestData),
     );
+
+    print("Status Code: ${response.statusCode}");
+    print("Response Body: ${response.body}");
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
@@ -104,12 +117,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           widget.order['status'] = status_;
         });
       } else {
-        print('Expected a Map, but received: $data');
+        print('Unexpected response format: $data');
       }
     } else {
-      print("Failed to update status: ${response.statusCode}");
+      print("Failed to update status. Code: ${response.statusCode}");
     }
+  } catch (e) {
+    print("Exception while updating status: $e");
   }
+}
 
   @override
   void initState() {
@@ -365,7 +381,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
             backgroundColor: Colors.green,
           ),
-          child: const Text('استلام الطلب'),
+          child: const Text('استلام من الفرع'),
         ),
         const SizedBox(height: 10),
         ElevatedButton(

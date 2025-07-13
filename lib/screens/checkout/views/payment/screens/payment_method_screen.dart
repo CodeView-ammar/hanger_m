@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pay_with_paymob/pay_with_paymob.dart';
 import 'package:provider/provider.dart';
 import '../controllers/payment_controller.dart';
 import '../widgets/payment_dialog.dart';
@@ -37,6 +38,13 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     super.initState();
     _paymentController = PaymentController();
     _initializeEnvironment();
+    PaymentData.initialize(
+    apiKey: Environment.paymobPublicKey,
+    iframeId: Environment.paymobIframeId,
+    integrationCardId: Environment.paymobApplePayIntegrationId,
+    integrationMobileWalletId: Environment.paymobApplePayIntegrationId,
+  // **لا تنسَ دمج applePay داخل إعدادات الطريق**
+);
   }
 
   Future<void> _initializeEnvironment() async {
@@ -191,12 +199,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
           icon: Icons.credit_card,
           onTap: () => _handleCardPayment(controller),
         ),
-        
         _buildPaymentOption(
           method: PaymentMethod.applePay,
           subtitle: 'ادفع باستخدام Apple Pay',
           icon: Icons.apple,
-          onTap:() => _handleApplePayPayment(controller), // غير متاح حاليًا
+          onTap: () => _handleApplePayPayment(controller), // غير متاح حاليًا
           isDisabled: false,
         ),
         _buildPaymentOption(

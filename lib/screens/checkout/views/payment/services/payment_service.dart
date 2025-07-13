@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import '../config/environment.dart';
 import '../models/payment_models.dart';
+import '../utils/crypto_helper.dart';
+import 'secure_storage_service.dart';
 
 /// خدمة الدفع المحسّنة والآمنة
 class PaymentService {
@@ -69,44 +71,54 @@ class PaymentService {
     });
   }
 
-Future<String> getPaymentKey({
-  required String paymentGatewayId, // استخدم المعرف هنا
-  required String authToken,
-  required int orderId,
-  required PaymentRequest paymentRequest,
-}) async {
-  print("Payment Gateway ID: $paymentGatewayId");
+  /// الحصول على مفتاح الدفع
+  Future<String> getPaymentKey({
+    required String type_payment,
+    required String authToken,
+    required int orderId,
+    required PaymentRequest paymentRequest,
+  }) async {
+    
+    print("type_payment: $type_payment");
+    
+    
+    return _executeWithRetry<String>(() async {
+      final response = await _dio.post(
+        "/acceptance/payment_keys",
+      data: {
+        "expiration": 3600,
+        "auth_token": authToken,
+        "order_id": orderId.toString(),
+        "integration_id": type_payment,
+        "amount_cents":  paymentRequest.toJson()['amount_cents'],
+        "currency": paymentRequest.currency,
+        "billing_data": {
+          "first_name": "Clifford",
+          "last_name": "Nicolas",
+          "email": "claudette09@exa.com",
+          "phone_number": "+86(8)9135210487",
+          "apartment": "NA",
+          "floor": "NA",
+          "street": "NA",
+          "building": "NA",
+          "shipping_method": "NA",
+          "postal_code": "NA",
+          "city": "NA",
+          "country": "NA",
+          "state": "NA"
+        },
+      },
 
-  return _executeWithRetry<String>(() async {
-    final data = {
-      "expiration": 3600,
-      "auth_token": authToken,
-      "order_id": orderId.toString(),
-      "integration_id": paymentGatewayId, // استخدم المعرف هنا
-      "amount_cents": paymentRequest.toJson()['amount_cents'],
-      "currency": paymentRequest.currency,
-    };
+      );
 
-    // تحقق مما إذا كانت طريقة الدفع تتطلب بيانات إضافية
-    if (paymentGatewayId == 'CARD' || paymentGatewayId == 'APPLE_PAY') {
-      data['billing_data'] = {
-        "first_name": paymentRequest.customerData,
-        "last_name": paymentRequest.customerData,
-        "email": "ammarwadood0@gmail.com",
-        "phone_number": "+966555555555",
-        // أضف المزيد من التفاصيل حسب الحاجة
-      };
-    }
+      if (response.data == null || response.data["token"] == null) {
+        throw PaymentException('فشل في الحصول على مفتاح الدفع');
+      }
 
-    final response = await _dio.post("/acceptance/payment_keys", data: data);
+      return response.data["token"] as String;
+    });
+  }
 
-    if (response.data == null || response.data["token"] == null) {
-      throw PaymentException('فشل في الحصول على مفتاح الدفع');
-    }
-
-    return response.data["token"] as String;
-  });
-}
   /// التحقق من حالة الدفع
   Future<PaymentStatus> checkPaymentStatus(int orderId) async {
     return _executeWithRetry<PaymentStatus>(() async {
@@ -162,7 +174,7 @@ Future<String> getPaymentKey({
 
       // 3. الحصول على مفتاح الدفع
       final paymentKey = await getPaymentKey(
-        paymentGatewayId: type_payment,
+        type_payment: type_payment,
         authToken: authToken,
         orderId: orderId,
         paymentRequest: paymentRequest,
