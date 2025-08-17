@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754303262184",
+    "project_id": "melaq-m",
+    "storage_bucket": "melaq-m.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754303262184:android:d17d949f3e32c7af2d985d",
+        "android_client_info": {
+          "package_name": "com.hangerapp.hanger_m"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlVq3cR0M-5iPJESFtBrb5AAXhU3xlmPo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

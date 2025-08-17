@@ -1,0 +1,28 @@
+# Dart & Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+build/
+
+# Android
+.android/
+*.keystore
+android/.gradle/
+android/key.jks
+android/app/debug/
+android/app/profile/
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# IntelliJ / VS Code
+*.iml
+.idea/
+*.lock
+*.log
+
+# Misc
+pubspec.lock
