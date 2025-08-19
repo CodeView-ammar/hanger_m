@@ -89,7 +89,7 @@ void _initializePaymentMethod() {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data[0]);
+      // print(data[0]);
       return data[0]['price_per_kg'];
     } else {
       print('فشل في جلب السعر: ${response.statusCode}');

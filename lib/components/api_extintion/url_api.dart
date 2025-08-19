@@ -1,5 +1,5 @@
 class APIConfig {
-  static const String _baseUrl = 'https://hangerapp.com.sa';
+  static const String _baseUrl = 'https://melaq.sa';
   static const String baseUrl = _baseUrl;
   static const String api_baseUrl='$_baseUrl/api';
  

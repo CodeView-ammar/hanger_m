@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:melaq/components/api_extintion/url_api.dart';
+import 'package:melaq/components/widgets/professional_order_tracker.dart';
+import 'package:melaq/components/widgets/order_status_indicator.dart';
 import 'package:melaq/constants.dart';
 import 'package:melaq/screens/discover/views/courier_order_details.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -97,7 +99,7 @@ Future<void> editStatusOrder(String status_) async {
   // محتوى الطلب
   Map<String, dynamic> requestData = {
     'user_id': userId,
-    // 'status': status_, // يمكن حذفه إن لم يكن مطلوبًا
+    'status': status_, // يمكن حذفه إن لم يكن مطلوبًا
   };
 
   try {
@@ -107,8 +109,6 @@ Future<void> editStatusOrder(String status_) async {
       body: json.encode(requestData),
     );
 
-    print("Status Code: ${response.statusCode}");
-    print("Response Body: ${response.body}");
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
@@ -293,15 +293,121 @@ Future<void> editStatusOrder(String status_) async {
   }
 
   Widget _buildOrderStatus() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Text(
-        'حالة الطلب: ${orderStatusTranslations[widget.order['status']] ?? 'غير محددة'}',
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: primaryColor,
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        const  Text(
+            'تتبع حالة الطلب',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // شريط التتبع الاحترافي الكامل
+          ProfessionalOrderTracker(
+            currentStatus: _convertToOrderStatus(widget.order['status']!),
+            estimatedTime: _getEstimatedTime(),
+            trackingNumber: widget.order['id'],
+            showProgressPercentage: true,
+            showTimeEstimate: true,
+            onStepTap: (status) {
+              _showStatusDetails(status);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// تحويل حالة الطلب من النص إلى نوع OrderStatus
+  OrderStatus _convertToOrderStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return OrderStatus.processing;
+      case 'courier_accepted':
+      case 'courier_on_the_way':
+        return OrderStatus.onTheWay;
+      case 'picked_up_from_customer':
+      case 'picked_up_from':
+        return OrderStatus.pickup;
+      case 'delivered_to_laundry':
+        return OrderStatus.deliveredToLaundry;
+      case 'completed':
+      case 'delivered_to_customer':
+      case 'courier_received':
+        return OrderStatus.completed;
+      case 'canceled':
+        return OrderStatus.canceled;
+      default:
+        return OrderStatus.processing;
+    }
+  }
+
+  /// الحصول على الوقت المتوقع للتوصيل
+  String? _getEstimatedTime() {
+    final status = widget.order['status']!;
+    switch (status) {
+      case 'pending':
+        return 'خلال 2-4 ساعات';
+      case 'courier_accepted':
+      case 'courier_on_the_way':
+        return 'خلال 30-60 دقيقة';
+      case 'picked_up_from_customer':
+        return '1-2 أيام';
+      case 'delivered_to_laundry':
+        return '2-3 أيام';
+      case 'ready_for_delivery':
+        return 'خلال 2-4 ساعات';
+      default:
+        return null;
+    }
+  }
+
+  /// عرض تفاصيل الحالة عند النقر على مرحلة
+  void _showStatusDetails(OrderStatus status) {
+    String title = '';
+    String description = '';
+
+    switch (status) {
+      case OrderStatus.processing:
+        title = 'معالجة الطلب';
+        description = 'تم استلام طلبك وجاري مراجعته وتحضيره للاستلام';
+        break;
+      case OrderStatus.onTheWay:
+        title = 'المندوب في الطريق';
+        description = 'المندوب في الطريق إليك لاستلام الملابس';
+        break;
+      case OrderStatus.pickup:
+        title = 'تم الاستلام';
+        description = 'تم استلام الملابس من منزلك بنجاح';
+        break;
+      case OrderStatus.deliveredToLaundry:
+        title = 'في المغسلة';
+        description = 'الملابس الآن في المغسلة وجاري معالجتها';
+        break;
+      case OrderStatus.completed:
+        title = 'تم التسليم';
+        description = 'تم إنجاز طلبك وتسليمه بنجاح';
+        break;
+      default:
+        return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(description),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('موافق'),
+          ),
+        ],
       ),
     );
   }
@@ -401,7 +507,7 @@ Future<void> editStatusOrder(String status_) async {
           onPressed: () {
             // هنا يمكنك إضافة الكود لاستلام الطلب
             print('استلام الطلب');
-            editStatusOrder('courier_accepted_end');
+            editStatusOrder('customer_accepted_end');
             
           },
           style: ElevatedButton.styleFrom(

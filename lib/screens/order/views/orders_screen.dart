@@ -6,8 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:melaq/components/api_extintion/url_api.dart';
 import 'package:melaq/components/custom_messages.dart';
 import 'package:melaq/components/order_process.dart';
+import 'package:melaq/components/widgets/professional_order_tracker.dart';
+import 'package:melaq/components/widgets/order_status_indicator.dart';
 import 'package:melaq/constants.dart';
 import 'package:melaq/l10n/app_localizations.dart';
+import 'package:melaq/widgets/rating_dialog.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -21,30 +24,30 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
   bool _isLoading = false;
   String? _errorMessage;
   List<OrderModel> _orders = [];
-  
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _fetchOrders();
   }
-  
+
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
   }
-  
+
   Future<void> _fetchOrders() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('userid');
-      
+
       if (userId == null) {
         setState(() {
           _isLoading = false;
@@ -52,18 +55,18 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
         });
         return;
       }
-      
+
       final response = await http.get(
         Uri.parse('${APIConfig.orderlaundryUrl}?user=$userId'),
       );
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         final List<OrderModel> orders = data.map((item) => OrderModel.fromJson(item)).toList();
-        
+
         // ترتيب الطلبات من الأحدث إلى الأقدم
         orders.sort((a, b) => b.dateCreated.compareTo(a.dateCreated));
-        
+
         setState(() {
           _orders = orders;
           _isLoading = false;
@@ -81,7 +84,7 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,21 +143,21 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
                         children: [
                           // كل الطلبات
                           _buildOrdersList(_orders),
-                          
+
                           // الطلبات الجارية
                           _buildOrdersList(_orders.where((order) => 
-                              order.status != 'delivered' && 
+                              order.status != 'completed' && 
                               order.status != 'canceled').toList()),
-                          
+
                           // الطلبات المكتملة
                           _buildOrdersList(_orders.where((order) => 
-                              order.status == 'delivered').toList()),
+                              order.status == 'completed').toList()),
                         ],
                       ),
       ),
     );
   }
-  
+
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
@@ -199,7 +202,7 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
       ),
     );
   }
-  
+
   Widget _buildOrdersList(List<OrderModel> orders) {
     if (orders.isEmpty) {
       return Center(
@@ -209,7 +212,7 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
         ),
       );
     }
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: orders.length,
@@ -225,27 +228,104 @@ class _OrdersScreenState extends State<OrdersScreen> with SingleTickerProviderSt
               ),
             ).then((_) => _fetchOrders());
           },
+          onShowRatingDialog: _showQuickRatingDialog,
         );
       },
     );
+  }
+
+  void _showQuickRatingDialog(BuildContext context, OrderModel order) {
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (context) => LaundryRatingDialog(
+    //     orderId: order.id.toString(),
+    //     laundryId: order.laundryId.toString(),
+    //     laundryName: order.laundryName,
+    //     onRatingSubmitted: () {
+    //       Navigator.pop(context);
+    //       setState(() {
+    //         // تحديث حالة التقييم محلياً
+    //         _orders = _orders.map((o) => 
+    //           o.id == order.id ? o.copyWith(hasRated: true) : o
+    //         ).toList();
+    //       });
+    //       _fetchOrders(); // إعادة تحميل الطلبات
+    //     },
+    //   ),
+    // );
+  }
+
+  /// تحويل حالة الطلب من النص إلى نوع OrderStatus
+  OrderStatus _convertToOrderStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'processing':
+        return OrderStatus.processing;
+      case 'on_the_way':
+      case 'ontheway':
+        return OrderStatus.onTheWay;
+      case 'pickup':
+      case 'picked_up':
+        return OrderStatus.pickup;
+      case 'delivered_to_laundry':
+      case 'at_laundry':
+        return OrderStatus.deliveredToLaundry;
+      case 'completed':
+        return OrderStatus.completed;
+      case 'canceled':
+      case 'cancelled':
+        return OrderStatus.canceled;
+      case 'error':
+        return OrderStatus.error;
+      default:
+        return OrderStatus.processing;
+    }
+  }
+
+  /// Static method for converting order status (for use in OrderCard)
+  static OrderStatus _convertOrderStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'processing':
+        return OrderStatus.processing;
+      case 'on_the_way':
+      case 'ontheway':
+        return OrderStatus.onTheWay;
+      case 'pickup':
+      case 'picked_up':
+        return OrderStatus.pickup;
+      case 'delivered_to_laundry':
+      case 'at_laundry':
+        return OrderStatus.deliveredToLaundry;
+      case 'completed':
+        return OrderStatus.completed;
+      case 'canceled':
+      case 'cancelled':
+        return OrderStatus.canceled;
+      case 'error':
+        return OrderStatus.error;
+      default:
+        return OrderStatus.processing;
+    }
   }
 }
 
 class OrderCard extends StatelessWidget {
   final OrderModel order;
   final VoidCallback onTap;
-  
+  final Function(BuildContext, OrderModel)? onShowRatingDialog;
+
   const OrderCard({
     Key? key,
     required this.order,
     required this.onTap,
+    this.onShowRatingDialog,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     final statusColor = _getStatusColor(order.status);
     final statusText = _getStatusText(order.status);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -321,60 +401,133 @@ class OrderCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              // حالة الطلب وزر التفاصيل
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+              // شريط الحالة الاحترافي
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: primaryColor.withOpacity(0.1),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Row(
                       children: [
-                        Icon(
-                          _getStatusIcon(order.status),
-                          size: 16,
-                          color: statusColor,
+                        OrderStatusIndicator(
+                          status: _OrdersScreenState._convertOrderStatus(order.status),
+                          size: OrderStatusIndicatorSize.medium,
+                          showLabel: true,
                         ),
-                        const SizedBox(width: 4),
+                        const Spacer(),
                         Text(
-                          statusText,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                          'تتبع الطلب',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: primaryColor,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  const Spacer(),
-                  TextButton.icon(
-                    onPressed: onTap,
-                    icon: const Icon(Icons.visibility_outlined, size: 16),
-                    label: const Text('عرض التفاصيل'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: primaryColor,
+                    const SizedBox(height: 12),
+                    QuickProgressBar(
+                      currentStatus: _OrdersScreenState._convertOrderStatus(order.status),
+                      height: 6,
+                      showLabels: false,
+                      animated: true,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              // أزرار الإجراءات
+              Row(
+                children: [
+                  if (order.status == 'completed' && !order.hasRated) ...[
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => onShowRatingDialog?.call(context, order),
+                        icon: const Icon(Icons.star_border, size: 18),
+                        label: const Text('تقييم السسسسسسسمغسلة'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber[700],
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    flex: order.status == 'completed' && !order.hasRated ? 1 : 2,
+                    child: OutlinedButton.icon(
+                      onPressed: onTap,
+                      icon: const Icon(Icons.visibility_outlined, size: 18),
+                      label: const Text('عرض التفاصيل'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: primaryColor,
+                        side: BorderSide(color: primaryColor),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
+              // مؤشر حالة التقييم
+              if (order.status == 'completed') ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: order.hasRated 
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.amber.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: order.hasRated 
+                          ? Colors.green.withOpacity(0.3)
+                          : Colors.amber.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        order.hasRated ? Icons.check_circle : Icons.star_outline,
+                        size: 16,
+                        color: order.hasRated ? Colors.green : Colors.amber[700],
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        order.hasRated ? 'تم تقييم المغسلة' : 'ننتظر تقييمك',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: order.hasRated ? Colors.green : Colors.amber[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
   }
-  
+
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
   }
-  
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -383,7 +536,7 @@ class OrderCard extends StatelessWidget {
         return primaryColor;
       case 'delivering':
         return primaryColor;
-      case 'delivered':
+      case 'completed':
         return Colors.green;
       case 'canceled':
         return Colors.red;
@@ -391,7 +544,7 @@ class OrderCard extends StatelessWidget {
         return Colors.grey;
     }
   }
-  
+
   String _getStatusText(String status) {
     switch (status) {
       case 'pending':
@@ -400,7 +553,7 @@ class OrderCard extends StatelessWidget {
         return 'قيد المعالجة';
       case 'delivering':
         return 'قيد التوصيل';
-      case 'delivered':
+      case 'completed':
         return 'تم التسليم';
       case 'canceled':
         return 'ملغي';
@@ -408,7 +561,7 @@ class OrderCard extends StatelessWidget {
         return 'غير معروف';
     }
   }
-  
+
   IconData _getStatusIcon(String status) {
     switch (status) {
       case 'pending':
@@ -417,7 +570,7 @@ class OrderCard extends StatelessWidget {
         return Icons.wash;
       case 'delivering':
         return Icons.local_shipping;
-      case 'delivered':
+      case 'completed':
         return Icons.check_circle;
       case 'canceled':
         return Icons.cancel;
@@ -430,12 +583,12 @@ class OrderCard extends StatelessWidget {
 // شاشة تفاصيل الطلب
 class OrderDetailsScreen extends StatefulWidget {
   final int orderId;
-  
+
   const OrderDetailsScreen({
     Key? key,
     required this.orderId,
   }) : super(key: key);
-  
+
   @override
   _OrderDetailsScreenState createState() => _OrderDetailsScreenState();
 }
@@ -444,27 +597,27 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   bool _isLoading = true;
   String? _errorMessage;
   OrderModel? _order;
-  
+
   @override
   void initState() {
     super.initState();
     _fetchOrderDetails();
   }
-  
+
   Future<void> _fetchOrderDetails() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
-    
+
     try {
       final response = await http.get(
         Uri.parse('${APIConfig.orderdetilsUrl}${widget.orderId}/'),
       );
-      
+
       if (response.statusCode == 200) {
         final dynamic data = json.decode(response.body);
-        
+
         setState(() {
           _order = OrderModel.fromJson(data);
           _isLoading = false;
@@ -482,7 +635,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -490,7 +643,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         title: Text('تفاصيل الطلب #${widget.orderId}'),
         elevation: 0,
         actions: [
-          if (_order != null && _order!.status == 'pending')
+          if (_order != null && (_order!.status == 'pending' || _order!.status == 'processing'))
             IconButton(
               icon: const Icon(Icons.cancel),
               tooltip: 'إلغاء الطلب',
@@ -538,38 +691,40 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                           children: [
                             // شريط حالة الطلب
                             _buildOrderStatusBar(),
-                            
+
                             const SizedBox(height: 24),
-                            
+
                             // معلومات الطلب
                             _buildOrderInfoCard(),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // العناصر المطلوبة
                             _buildOrderItemsCard(),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // معلومات التوصيل
                             _buildDeliveryInfoCard(),
-                            
+
                             const SizedBox(height: 16),
-                            
+
                             // ملخص المبلغ
                             _buildPriceSummaryCard(),
-                            
+
                             // معلومات المستلم (في حالة التسليم)
-                            if (_order!.status == 'delivered')
+                            if (_order!.status == 'completed')
                               Column(
                                 children: [
                                   const SizedBox(height: 16),
                                   _buildDeliveryConfirmationCard(),
+                                  const SizedBox(height: 16),
+                                  _buildRatingSection(),
                                 ],
                               ),
-                            
+
                             const SizedBox(height: 24),
-                            
+
                             // زر طلب الدعم
                             SizedBox(
                               width: double.infinity,
@@ -595,19 +750,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     ),
     );
   }
-  
+
   Widget _buildOrderStatusBar() {
     // تحويل حالة الطلب إلى حالات مكون OrderProgress
     final bool isCanceled = _order!.status == 'canceled';
-    final DateTime now = DateTime.now();
-    
+    final bool isCompleted = _order!.status == 'completed';
+
     // تحديد الحالات بناءً على حالة الطلب
     OrderProcessStatus orderStatus = OrderProcessStatus.done;
     OrderProcessStatus processingStatus = OrderProcessStatus.notDoneYeat;
     OrderProcessStatus packedStatus = OrderProcessStatus.notDoneYeat;
     OrderProcessStatus shippedStatus = OrderProcessStatus.notDoneYeat;
     OrderProcessStatus deliveredStatus = OrderProcessStatus.notDoneYeat;
-    
+
     switch (_order!.status) {
       case 'pending':
         processingStatus = OrderProcessStatus.processing;
@@ -621,7 +776,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         packedStatus = OrderProcessStatus.done;
         shippedStatus = OrderProcessStatus.processing;
         break;
-      case 'delivered':
+      case 'completed':
         processingStatus = OrderProcessStatus.done;
         packedStatus = OrderProcessStatus.done;
         shippedStatus = OrderProcessStatus.done;
@@ -630,7 +785,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       case 'canceled':
         break;
     }
-    
+
     return Card(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -645,6 +800,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           shippedStatus: shippedStatus,
           deliveredStatus: deliveredStatus,
           isCanceled: isCanceled,
+          isCompleted: isCompleted, // إيقاف الرسوم المتحركة للطلبات المكتملة
           estimatedDeliveryTime: _getEstimatedDeliveryTime(),
           onStepTap: (index) {
             AppMessageService().showInfoMessage(
@@ -656,14 +812,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   String _getEstimatedDeliveryTime() {
-    if (_order!.status == 'delivered') {
+    if (_order!.status == 'completed') {
       return 'تم التوصيل بنجاح';
     } else if (_order!.status == 'canceled') {
       return 'تم إلغاء الطلب';
     }
-    
+
     // أمثلة افتراضية للتوقيت المتوقع (في التطبيق الحقيقي ستأتي من API)
     if (_order!.status == 'delivering') {
       return 'خلال 30 دقيقة';
@@ -673,7 +829,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       return 'غداً في حوالي الساعة 10:00 صباحاً';
     }
   }
-  
+
   String _getStepInfo(int index) {
     switch (index) {
       case 0:
@@ -686,19 +842,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       case 2:
         if (_order!.status == 'processing') {
           return 'جاري تغليف وتجهيز طلبك...';
-        } else if (['delivering', 'delivered'].contains(_order!.status)) {
+        } else if (['delivering', 'completed'].contains(_order!.status)) {
           return 'تم تغليف وتجهيز طلبك';
         }
         return 'سيتم تغليف وتجهيز طلبك قريباً';
       case 3:
         if (_order!.status == 'delivering') {
           return 'الطلب في طريقه إليك الآن!';
-        } else if (_order!.status == 'delivered') {
+        } else if (_order!.status == 'completed') {
           return 'تم تسليم طلبك بنجاح';
         }
         return 'سيتم تسليم طلبك حالما يكون جاهزاً';
       case 4:
-        if (_order!.status == 'delivered') {
+        if (_order!.status == 'completed') {
           return 'تم تسليم طلبك في ${_formatDateWithTime(_order!.dateDelivered ?? DateTime.now())}';
         } else if (_order!.status == 'canceled') {
           return 'تم إلغاء الطلب في ${_formatDateWithTime(_order!.dateUpdated)}';
@@ -708,7 +864,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         return 'معلومات الطلب';
     }
   }
-  
+
   Widget _buildOrderInfoCard() {
     return Card(
       elevation: 2,
@@ -781,7 +937,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   Widget _buildOrderItemsCard() {
     return Card(
       elevation: 2,
@@ -813,7 +969,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   Widget _buildOrderItemRow(OrderItemModel item) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -872,7 +1028,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   Widget _buildDeliveryInfoCard() {
     return Card(
       elevation: 2,
@@ -922,7 +1078,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   Widget _buildPriceSummaryCard() {
     return Card(
       elevation: 2,
@@ -1002,7 +1158,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   Widget _buildDeliveryConfirmationCard() {
     return Card(
       elevation: 2,
@@ -1048,7 +1204,158 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
+  Widget _buildRatingSection() {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.star_rounded,
+                    color: primaryColor,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _order!.hasRated ? 'شكراً لك على التقييم!' : 'قيّم تجربتك',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        _order!.hasRated 
+                            ? 'تم إرسال تقييمك بنجاح' 
+                            : 'ساعد الآخرين بمشاركة رأيك في ${_order!.laundryName}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (!_order!.hasRated) ...[
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showRatingDialog(),
+                      icon: const Icon(Icons.star_border_rounded),
+                      label: const Text('تقييم الخدمة'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: primaryColor,
+                        side: const BorderSide(color: primaryColor),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.card_giftcard,
+                          size: 16,
+                          color: Colors.amber[700],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'احصل على نقاط',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.amber[700],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green[700], size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'تم إرسال تقييمك بنجاح! شكراً لمساعدة المجتمع',
+                        style: TextStyle(
+                          color: Colors.green[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showRatingDialog() {
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (context) => LaundryRatingDialog(
+    //     orderId: _order!.id.toString(),
+    //     laundryId: _order!.laundryId.toString(),
+    //     laundryName: _order!.laundryName,
+    //     onRatingSubmitted: () {
+    //       Navigator.pop(context);
+    //       // تحديث حالة التقييم محلياً
+    //       setState(() {
+    //         _order = _order!.copyWith(hasRated: true);
+    //       });
+    //       // إعادة تحميل تفاصيل الطلب للحصول على أحدث البيانات
+    //       _fetchOrderDetails();
+    //     },
+    //   ),
+    // );
+  }
+
   Widget _buildInfoRow(String label, String value, IconData icon, {Color? textColor}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1080,15 +1387,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ],
     );
   }
-  
+
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
   }
-  
+
   String _formatDateWithTime(DateTime date) {
     return DateFormat('dd/MM/yyyy - hh:mm a').format(date);
   }
-  
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -1097,7 +1404,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         return primaryColor;
       case 'delivering':
         return primaryColor;
-      case 'delivered':
+      case 'completed':
         return Colors.green;
       case 'canceled':
         return Colors.red;
@@ -1105,7 +1412,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         return Colors.grey;
     }
   }
-  
+
   String _getStatusText(String status) {
     switch (status) {
       case 'pending':
@@ -1114,7 +1421,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         return 'قيد المعالجة';
       case 'delivering':
         return 'قيد التوصيل';
-      case 'delivered':
+      case 'completed':
         return 'تم التسليم';
       case 'canceled':
         return 'ملغي';
@@ -1122,7 +1429,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         return 'غير معروف';
     }
   }
-  
+
   void _showCancelOrderDialog() {
     showDialog(
       context: context,
@@ -1150,7 +1457,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
-  
+
   Future<void> _cancelOrder() async {
     try {
       // عرض مؤشر تحميل
@@ -1161,7 +1468,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           child: CircularProgressIndicator(),
         ),
       );
-      
+
       final response = await http.post(
         Uri.parse('${APIConfig.orderlaundryUrl}${widget.orderId}/'),
         headers: {
@@ -1171,17 +1478,17 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           'reason': 'تم الإلغاء بواسطة العميل',
         }),
       );
-      
+
       // إغلاق مؤشر التحميل
       if (context.mounted) Navigator.of(context).pop();
-      
+
       if (response.statusCode == 200) {
         // تم إلغاء الطلب بنجاح
         AppMessageService().showSuccessMessage(
           context, 
           'تم إلغاء الطلب بنجاح',
         );
-        
+
         // إعادة تحميل تفاصيل الطلب لتحديث الحالة
         await _fetchOrderDetails();
       } else {
@@ -1194,7 +1501,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     } catch (e) {
       // إغلاق مؤشر التحميل إذا حدث خطأ
       if (context.mounted) Navigator.of(context).pop();
-      
+
       AppMessageService().showErrorMessage(
         context, 
         'حدث خطأ أثناء إلغاء الطلب: $e',
@@ -1207,6 +1514,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 class OrderModel {
   final int id;
   final String status;
+  final int laundryId;
   final String laundryName;
   final double subtotalPrice;
   final double deliveryFee;
@@ -1221,10 +1529,12 @@ class OrderModel {
   final DateTime? dateDelivered;
   final String? receiverName;
   final List<OrderItemModel> items;
-  
+  final bool hasRated;
+
   OrderModel({
     required this.id,
     required this.status,
+    required this.laundryId,
     required this.laundryName,
     required this.subtotalPrice,
     required this.deliveryFee,
@@ -1239,12 +1549,14 @@ class OrderModel {
     this.dateDelivered,
     this.receiverName,
     required this.items,
+    this.hasRated = false,
   });
-  
+
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       id: json['id'],
       status: json['status'],
+      laundryId: json['laundry_id'] ?? 0,
       laundryName: json['laundry_name'] ?? 'مغسلة',
       subtotalPrice: (json['subtotal_price'] as num).toDouble(),
       deliveryFee: (json['delivery_fee'] as num).toDouble(),
@@ -1263,6 +1575,49 @@ class OrderModel {
       items: (json['items'] as List<dynamic>? ?? [])
           .map((item) => OrderItemModel.fromJson(item))
           .toList(),
+      hasRated: json['has_rated'] ?? false,
+    );
+  }
+
+  OrderModel copyWith({
+    int? id,
+    String? status,
+    int? laundryId,
+    String? laundryName,
+    double? subtotalPrice,
+    double? deliveryFee,
+    double? discount,
+    double? totalPrice,
+    String? deliveryAddress,
+    String? phoneNumber,
+    String? deliveryNotes,
+    String? paymentMethod,
+    DateTime? dateCreated,
+    DateTime? dateUpdated,
+    DateTime? dateDelivered,
+    String? receiverName,
+    List<OrderItemModel>? items,
+    bool? hasRated,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      status: status ?? this.status,
+      laundryId: laundryId ?? this.laundryId,
+      laundryName: laundryName ?? this.laundryName,
+      subtotalPrice: subtotalPrice ?? this.subtotalPrice,
+      deliveryFee: deliveryFee ?? this.deliveryFee,
+      discount: discount ?? this.discount,
+      totalPrice: totalPrice ?? this.totalPrice,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      deliveryNotes: deliveryNotes ?? this.deliveryNotes,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      dateCreated: dateCreated ?? this.dateCreated,
+      dateUpdated: dateUpdated ?? this.dateUpdated,
+      dateDelivered: dateDelivered ?? this.dateDelivered,
+      receiverName: receiverName ?? this.receiverName,
+      items: items ?? this.items,
+      hasRated: hasRated ?? this.hasRated,
     );
   }
 }
@@ -1274,7 +1629,7 @@ class OrderItemModel {
   final int quantity;
   final double price;
   final String notes;
-  
+
   OrderItemModel({
     required this.id,
     required this.name,
@@ -1282,7 +1637,7 @@ class OrderItemModel {
     required this.price,
     required this.notes,
   });
-  
+
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
       id: json['id'],

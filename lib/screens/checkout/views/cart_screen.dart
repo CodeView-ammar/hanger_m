@@ -241,12 +241,7 @@ double distance = 0.0; // متغير للمسافة
     return Scaffold(
           appBar: AppBar(
       title: Text(AppLocalizations.of(context)!.shoppingcart),
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back),
-        onPressed: () {
-             
-        },
-      ),
+      
     ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

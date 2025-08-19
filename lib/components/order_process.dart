@@ -26,6 +26,11 @@ class EnhancedOrderProgress extends StatefulWidget {
     this.flowingDotsCount = 3,
     this.usePulseEffect = true,
     this.useGradient = true,
+    this.isCompleted = false,
+    this.hasRated = false,
+    this.onRatingTap,
+    this.laundryName,
+    this.orderId,
   });
 
   final OrderProcessStatus orderStatus,
@@ -46,6 +51,13 @@ class EnhancedOrderProgress extends StatefulWidget {
   final int flowingDotsCount;
   final bool usePulseEffect;
   final bool useGradient;
+  
+  // معاملات التقييم
+  final bool isCompleted;
+  final bool hasRated;
+  final VoidCallback? onRatingTap;
+  final String? laundryName;
+  final String? orderId;
 
   @override
   State<EnhancedOrderProgress> createState() => _EnhancedOrderProgressState();
@@ -248,6 +260,9 @@ class _EnhancedOrderProgressState extends State<EnhancedOrderProgress> with Sing
             ),
           ),
         ),
+        
+        // قسم التقييم عند اكتمال الطلب
+        if (widget.isCompleted) _buildRatingSection(),
       ],
     );
   }
@@ -298,7 +313,7 @@ class _EnhancedOrderProgressState extends State<EnhancedOrderProgress> with Sing
       return primaryColor;
     }
     if (isDone) {
-      return successColor;
+      return primaryColor;
     }
     return Theme.of(context).textTheme.bodyMedium!.color!;
   }
@@ -313,9 +328,192 @@ class _EnhancedOrderProgressState extends State<EnhancedOrderProgress> with Sing
       case OrderProcessStatus.processing:
         return primaryColor;
       case OrderProcessStatus.done:
-        return successColor;
+        return primaryColor;
       default:
         return primaryColor;
     }
+  }
+
+  /// بناء قسم التقييم عند اكتمال الطلب
+  Widget _buildRatingSection() {
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            primaryColor.withOpacity(0.1),
+            primaryColor.withOpacity(0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: primaryColor.withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // أيقونة وعنوان التقييم
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: primaryColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withOpacity(0.3),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'تم إنجاز طلبك بنجاح!',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.laundryName ?? 'مغسلة الجودة',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // قسم التقييم
+          if (!widget.hasRated) ...[
+            // لم يتم التقييم بعد
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: primaryColor.withOpacity(0.2)),
+              ),
+              child: Column(
+                children: [
+                 const Row(
+                    children: [
+                      Icon(
+                        Icons.star_border,
+                        color: primaryColor,
+                        size: 24,
+                      ),
+                       SizedBox(width: 12),
+                       Expanded(
+                        child: Text(
+                          'شاركنا تجربتك مع هذه المغسلة',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'تقييمك يساعدنا في تحسين الخدمة ومساعدة العملاء الآخرين',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: widget.onRatingTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 2,
+                      ),
+                      icon: const Icon(Icons.star_rate, size: 20),
+                      label: const Text(
+                        'تقييم المغسلة',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            // تم التقييم مسبقاً
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: primaryColor.withOpacity(0.3)),
+              ),
+              child:const Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: primaryColor,
+                    size: 24,
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'شكراً لك! تم إرسال تقييمك بنجاح',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
