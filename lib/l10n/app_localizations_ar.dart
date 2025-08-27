@@ -55,7 +55,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get findLaundriesNearbyDescription => 'هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك.';
 
   @override
-  String get home => 'الرئيسي';
+  String get home => 'الرئيسية';
 
   @override
   String get orders => 'طلبات';
@@ -238,7 +238,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sar => 'ر.س';
 
   @override
-  String get urgent => 'مستعجلة';
+  String get urgent => 'مستعجل';
 
   @override
   String get normal => 'عادي';

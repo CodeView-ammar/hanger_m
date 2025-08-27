@@ -449,7 +449,7 @@ class OrderCard extends StatelessWidget {
                       child: ElevatedButton.icon(
                         onPressed: () => onShowRatingDialog?.call(context, order),
                         icon: const Icon(Icons.star_border, size: 18),
-                        label: const Text('تقييم السسسسسسسمغسلة'),
+                        label: const Text('تقييم المغسلة'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.amber[700],
                           foregroundColor: Colors.white,
@@ -799,6 +799,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           packedStatus: packedStatus,
           shippedStatus: shippedStatus,
           deliveredStatus: deliveredStatus,
+          laundryName: _order!.laundryName,
           isCanceled: isCanceled,
           isCompleted: isCompleted, // إيقاف الرسوم المتحركة للطلبات المكتملة
           estimatedDeliveryTime: _getEstimatedDeliveryTime(),

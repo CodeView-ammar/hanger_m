@@ -7,7 +7,6 @@ import '../widgets/loading_overlay.dart';
 import '../widgets/error_dialog.dart';
 import '../models/payment_models.dart';
 import '../utils/payment_validator.dart';
-import '../constants/payment_constants.dart';
 import '../config/environment.dart';
 
 /// شاشة اختيار طريقة الدفع المحسّنة

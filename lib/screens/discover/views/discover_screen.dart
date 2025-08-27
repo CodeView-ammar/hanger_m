@@ -81,6 +81,7 @@ class _OrderScreenState extends State<OrderScreen> {
           orders = data.map<Map<String, String>>((order) {
             return {
               'id':order['id'].toString(),
+              "laundryId":order['laundry_id'],
               'name': utf8.decode(order['laundry_name'].codeUnits) ?? 'اسم غير متاح',
               'image': order['laundry_image'] ?? '${APIConfig.static_baseUrl}/images/store.jpg',
               'price': order['total_amount']?.toString() ?? '0',

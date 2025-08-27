@@ -143,7 +143,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       _loadServices(),
       fetchTotalPrice(widget.id),
     _loadReviews(),
-// _checkIfFavorited(),
+_checkIfFavorited(),
     ]);
   }
 

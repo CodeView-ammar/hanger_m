@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:melaq/constants.dart';
+import 'package:melaq/services/review_service.dart';
 
 enum OrderStatus { processing, onTheWay, pickup, deliveredToLaundry, completed, canceled, error }
 
@@ -17,8 +18,9 @@ class ProfessionalOrderTracker extends StatefulWidget {
     this.compactMode = false,
     this.hasRated = false,
     this.onRatingTap,
-    this.laundryName,
+    required this.laundryName,
     this.orderId,
+    this.laundryId, // إضافة معرف المغسلة
     this.onRatingSubmitted, // دالة جديدة لإرسال التقييم
   });
 
@@ -34,7 +36,8 @@ class ProfessionalOrderTracker extends StatefulWidget {
   final VoidCallback? onRatingTap;
   final String? laundryName;
   final String? orderId;
-  final Function(int rating, String comment)? onRatingSubmitted; // دالة جديدة
+  final int? laundryId; // إضافة معرف المغسلة
+  final Function(double serviceQuality, double deliverySpeed, double priceValue, String comment)? onRatingSubmitted; // تحديث دالة التقييم
 
   @override
   State<ProfessionalOrderTracker> createState() => _ProfessionalOrderTrackerState();
@@ -51,9 +54,15 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
   late Animation<double> _pulseAnimation;
   late Animation<double> _progressAnimation;
 
+  // متغير لتتبع حالة التقييم محلياً
+  bool _hasRatedLocally = false;
+
   @override
   void initState() {
     super.initState();
+    
+    // تهيئة حالة التقييم المحلية
+    _hasRatedLocally = widget.hasRated;
 
     _mainAnimationController = AnimationController(
       vsync: this,
@@ -110,8 +119,7 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
 
   // دالة للتحقق من إمكانية التقييم
   bool _canRate() {
-    return widget.currentStatus == OrderStatus.completed ||
-           widget.currentStatus == OrderStatus.canceled;
+    return widget.currentStatus == OrderStatus.completed;
   }
 
   @override
@@ -121,6 +129,12 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
       _mainAnimationController.reset();
       _progressAnimationController.reset();
       _startAnimations();
+    }
+    // تحديث حالة التقييم إذا تغيرت من الوالد
+    if (oldWidget.hasRated != widget.hasRated) {
+      setState(() {
+        _hasRatedLocally = widget.hasRated;
+      });
     }
   }
 
@@ -135,7 +149,7 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
   List<OrderStepData> get _orderSteps => [
     const OrderStepData(
       status: OrderStatus.processing,
-      title: 'يعالج',
+      title: 'بانتظار قبول الطلب',
       subtitle: 'تم استلام الطلب',
       icon: Icons.receipt_long_outlined,
       activeIcon: Icons.receipt_long,
@@ -186,17 +200,25 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
     return (_currentStepIndex + 1) / _orderSteps.length;
   }
 
-  // دالة لعرض نافذة التقييم
-  void _showRatingDialog() {
-    showDialog(
+  // دالة لعرض نافذة التقييم مع معالجة النتيجة
+  void _showRatingDialog() async {
+    final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => LaundryRatingDialog(
-        laundryName: widget.laundryName ?? 'المغسلة',
-        orderId: widget.orderId,
+      builder: (context) => LaundryRatingScreen(
+        laundryName: widget.laundryName ?? '',
+        laundryId: widget.laundryId,
+        orderId: widget.trackingNumber,
         onRatingSubmitted: widget.onRatingSubmitted,
       ),
     );
+
+    // إذا تم إرسال التقييم بنجاح (result == true)
+    if (result == true) {
+      setState(() {
+        _hasRatedLocally = true;
+      });
+    }
   }
 
   @override
@@ -392,7 +414,7 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
                 children: [
                   // نقطة الحالة
                   AnimatedBuilder(
-                    animation: isActive ? _pulseAnimation : 
+                    animation: isActive ? _pulseAnimation :
                                const AlwaysStoppedAnimation(1.0),
                     builder: (context, child) {
                       return Transform.scale(
@@ -472,13 +494,13 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
               )
             else if (isActive && _isOrderFinished())
               Icon(
-                widget.currentStatus == OrderStatus.completed 
-                    ? Icons.check_circle 
+                widget.currentStatus == OrderStatus.completed
+                    ? Icons.check_circle
                     : widget.currentStatus == OrderStatus.canceled
                         ? Icons.cancel
                         : Icons.error,
-                color: widget.currentStatus == OrderStatus.completed 
-                    ? successColor 
+                color: widget.currentStatus == OrderStatus.completed
+                    ? successColor
                     : widget.currentStatus == OrderStatus.canceled
                         ? Colors.orange
                         : Colors.red,
@@ -594,16 +616,16 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
     }
 
     // تحديد الألوان والنصوص حسب حالة الطلب
-    Color sectionColor = widget.currentStatus == OrderStatus.completed 
-        ? successColor 
+    Color sectionColor = widget.currentStatus == OrderStatus.completed
+        ? successColor
         : Colors.orange;
-    
-    IconData sectionIcon = widget.currentStatus == OrderStatus.completed 
-        ? Icons.check_circle_outline 
+
+    IconData sectionIcon = widget.currentStatus == OrderStatus.completed
+        ? Icons.check_circle_outline
         : Icons.info_outline;
-    
-    String sectionTitle = widget.currentStatus == OrderStatus.completed 
-        ? 'تم إنجاز طلبك بنجاح!' 
+
+    String sectionTitle = widget.currentStatus == OrderStatus.completed
+        ? 'تم إنجاز طلبك بنجاح!'
         : 'تم إلغاء الطلب';
 
     return Container(
@@ -668,14 +690,45 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
                         color: sectionColor,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.laundryName ?? 'مغسلة الجودة',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                    Row(
+                      children: [
+                        const Text(
+                      'مغسلة',
+                            style: TextStyle(
+                                fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                          Text(
+                            widget.laundryName ?? '',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          ]
+                          ),
+                              Row(
+                      children: [
+                        const Icon(
+                          Icons.info,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.currentStatus == OrderStatus.completed
+                              ? 'نأمل أن تكون راضيًا عن الخدمة!'
+                              : 'نأسف لإلغاء طلبك. نأمل أن نخدمك بشكل أفضل في المستقبل.',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 4),
+                    
                   ],
                 ),
               ),
@@ -684,8 +737,8 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
 
           const SizedBox(height: 20),
 
-          // قسم التقييم
-          if (!widget.hasRated) ...[
+          // قسم التقييم - استخدام الحالة المحلية _hasRatedLocally
+          if (!_hasRatedLocally) ...[
             // لم يتم التقييم بعد
             Container(
               padding: const EdgeInsets.all(16),
@@ -729,7 +782,6 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        print('تم النقر على زر التقييم'); // للتأكد من عمل الزر
                         // استدعاء الدالة المرسلة من الوالد أو عرض النافذة مباشرة
                         if (widget.onRatingTap != null) {
                           widget.onRatingTap!();
@@ -746,7 +798,7 @@ class _ProfessionalOrderTrackerState extends State<ProfessionalOrderTracker>
                         ),
                         elevation: 2,
                       ),
-                      icon: const Icon(Icons.star_rate, size: 20),
+                      icon: const Icon(Icons.star_rate, size: 5),
                       label: const Text(
                         'تقييم المغسلة',
                         style: TextStyle(
@@ -812,45 +864,49 @@ class OrderStepData {
   });
 }
 
-// نافذة التقييم
-class LaundryRatingDialog extends StatefulWidget {
+// شاشة التقييم الكاملة
+class LaundryRatingScreen extends StatefulWidget {
   final String laundryName;
+  final int? laundryId;
   final String? orderId;
-  final Function(int rating, String comment)? onRatingSubmitted;
+  final Function(double serviceQuality, double deliverySpeed, double priceValue, String comment)? onRatingSubmitted;
 
-  const LaundryRatingDialog({
+  const LaundryRatingScreen({
     super.key,
     required this.laundryName,
+    this.laundryId,
     this.orderId,
     this.onRatingSubmitted,
   });
 
   @override
-  State<LaundryRatingDialog> createState() => _LaundryRatingDialogState();
+  State<LaundryRatingScreen> createState() => _LaundryRatingScreenState();
 }
 
-class _LaundryRatingDialogState extends State<LaundryRatingDialog>
+class _LaundryRatingScreenState extends State<LaundryRatingScreen>
     with TickerProviderStateMixin {
-  int _selectedRating = 0;
+  double _serviceQuality = 0.0;
+  double _deliverySpeed = 0.0;
+  double _priceValue = 0.0;
   final TextEditingController _commentController = TextEditingController();
   late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
+      duration: const Duration(milliseconds: 600),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
     );
 
     _animationController.forward();
@@ -863,272 +919,622 @@ class _LaundryRatingDialogState extends State<LaundryRatingDialog>
     super.dispose();
   }
 
+  double get _overallRating {
+    if (_serviceQuality == 0 && _deliverySpeed == 0 && _priceValue == 0) return 0.0;
+    return (_serviceQuality + _deliverySpeed + _priceValue) / 3;
+  }
+
   String get _ratingText {
-    switch (_selectedRating) {
-      case 1:
-        return 'سيئ جداً';
-      case 2:
-        return 'سيئ';
-      case 3:
-        return 'مقبول';
-      case 4:
-        return 'جيد';
-      case 5:
-        return 'ممتاز';
-      default:
-        return 'اختر التقييم';
-    }
+    final rating = _overallRating;
+    if (rating == 0) return 'اختر التقييم';
+    if (rating <= 2) return 'سيئ';
+    if (rating <= 3) return 'مقبول';
+    if (rating <= 4) return 'جيد';
+    return 'ممتاز';
   }
 
   Color get _ratingColor {
-    if (_selectedRating <= 2) return Colors.red;
-    if (_selectedRating <= 3) return Colors.orange;
+    final rating = _overallRating;
+    if (rating <= 2) return Colors.red;
+    if (rating <= 3) return Colors.orange;
     return successColor;
   }
 
-  void _submitRating() {
-    if (_selectedRating == 0) {
+  bool get _canSubmit {
+    return _serviceQuality > 0 && _deliverySpeed > 0 && _priceValue > 0;
+  }
+
+  void _submitRating() async {
+    if (!_canSubmit) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('يرجى اختيار التقييم أولاً'),
+          content: Text('يرجى تقييم جميع الجوانب أولاً'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    // التحقق من وجود معرف المغسلة
+    if (widget.laundryId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('خطأ: لا يمكن إرسال التقييم بدون معرف المغسلة'),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    // استدعاء الدالة المرسلة
-    if (widget.onRatingSubmitted != null) {
-      widget.onRatingSubmitted!(_selectedRating, _commentController.text);
-    }
-
-    // إغلاق النافذة
-    Navigator.of(context).pop();
-
-    // عرض رسالة نجاح
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('تم إرسال التقييم بنجاح! شكراً لك'),
-        backgroundColor: successColor,
+    // عرض مؤشر التحميل
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    try {
+      // إرسال التقييم إلى الخادم
+      final review = await ReviewService.addLaundryReview(
+        laundryId: widget.laundryId!,
+        withOrderId: int.parse(widget.orderId!),
+        serviceQuality: _serviceQuality,
+        deliverySpeed: _deliverySpeed,
+        priceValue: _priceValue,
+        comment: _commentController.text.trim(),
+      );
+
+      print('تم إرسال التقييم بنجاح: ${review.toString()}');
+
+      // استدعاء الدالة المرسلة من الوالد فقط إذا نجح الإرسال
+      if (widget.onRatingSubmitted != null) {
+        widget.onRatingSubmitted!(
+          _serviceQuality,
+          _deliverySpeed,
+          _priceValue,
+          _commentController.text.trim(),
+        );
+      }
+
+      // إخفاء مؤشر التحميل
+      Navigator.of(context).pop();
+
+      // إغلاق شاشة التقييم مع إرجاع true للإشارة إلى نجاح العملية
+      Navigator.of(context).pop(true);
+      
+      // عرض رسالة نجاح فقط بعد التأكد من الإرسال
+      if (review != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('تم إرسال التقييم بنجاح! شكراً لك'),
+            backgroundColor: successColor,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } catch (e) {
+      // إخفاء مؤشر التحميل
+      Navigator.of(context).pop();
+
+      print('خطأ في إرسال التقييم: $e');
+
+      // عرض رسالة خطأ مفصلة
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('فشل في إرسال التقييم: ${e.toString().replaceAll('Exception: ', '')}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'إعادة المحاولة',
+            textColor: Colors.white,
+            onPressed: _submitRating,
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: AnimatedBuilder(
-        animation: _animationController,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _scaleAnimation.value,
-            child: Opacity(
-              opacity: _fadeAnimation.value,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 0),
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Header
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: AnimatedBuilder(
+          animation: _animationController,
+          builder: (context, child) {
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: CustomScrollView(
+                  slivers: [
+                    // AppBar مخصص
+                    SliverAppBar(
+                      expandedHeight: 200,
+                      floating: false,
+                      pinned: true,
+                      elevation: 0,
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.transparent,
+                      leading: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Container(
+                          padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
+                            color: Colors.grey[100],
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.star_rate,
-                            color: primaryColor,
-                            size: 24,
+                            Icons.arrow_back_ios_new,
+                            color: Colors.black87,
+                            size: 18,
                           ),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
+                      ),
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                primaryColor.withOpacity(0.1),
+                                Colors.white,
+                              ],
+                            ),
+                          ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
+                              const SizedBox(height: 40),
+                              Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: primaryColor,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primaryColor.withOpacity(0.3),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.star_rate,
+                                  color: Colors.white,
+                                  size: 40,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
                               const Text(
                                 'تقييم المغسلة',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
                                 ),
                               ),
+                              const SizedBox(height: 8),
+                            
+                                
                               Text(
                                 widget.laundryName,
                                 style: const TextStyle(
-                                  fontSize: 16,
-                                  color: Color.fromRGBO(158, 158, 158, 1),
-                                ),
-                              ),
-                                                            Text(
-                                widget.laundryName,
-                                style: const TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 18,
                                   color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          icon: const Icon(Icons.close, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Rating Stars
-                    Column(
-                      children: [
-                        const Text(
-                          'كيف كانت تجربتك؟',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (index) {
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _selectedRating = index + 1;
-                                });
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                margin: const EdgeInsets.symmetric(horizontal: 4),
-                                child: Icon(
-                                  index < _selectedRating 
-                                      ? Icons.star 
-                                      : Icons.star_border,
-                                  color: index < _selectedRating 
-                                      ? Colors.amber 
-                                      : Colors.grey[400],
-                                  size: 36,
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 12),
-                        AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 300),
-                          child: Text(
-                            _ratingText,
-                            key: ValueKey(_selectedRating),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: _selectedRating > 0 ? _ratingColor : Colors.grey,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Comment TextField
-                    TextField(
-                      controller: _commentController,
-                      maxLines: 3,
-                      textAlign: TextAlign.right,
-                      decoration: InputDecoration(
-                        hintText: 'اكتب تعليقك (اختياري)',
-                        hintStyle: const TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: primaryColor, width: 2),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey[300]!),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey[50],
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    // المحتوى الرئيسي
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // التقييم الإجمالي
+                            if (_overallRating > 0) ...[
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(24),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      _ratingColor.withOpacity(0.1),
+                                      _ratingColor.withOpacity(0.05),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: _ratingColor.withOpacity(0.3)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: _ratingColor.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'التقييم الإجمالي',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: _ratingColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          _overallRating.toStringAsFixed(1),
+                                          style: TextStyle(
+                                            fontSize: 48,
+                                            fontWeight: FontWeight.bold,
+                                            color: _ratingColor,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Column(
+                                          children: [
+                                            Row(
+                                              children: List.generate(5, (index) {
+                                                return Icon(
+                                                  index < _overallRating
+                                                      ? Icons.star
+                                                      : Icons.star_border,
+                                                  color: Colors.amber,
+                                                  size: 24,
+                                                );
+                                              }),
+                                            ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              _ratingText,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: _ratingColor,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 32),
+                            ],
 
-                    // Action Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.grey),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                            // التقييمات التفصيلية
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'قيم تجربتك',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'شاركنا رأيك في الجوانب التالية',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+
+                                  // جودة الخدمة
+                                  _buildRatingAspect(
+                                    title: 'جودة الخدمة',
+                                    subtitle: 'مستوى النظافة وجودة الغسيل',
+                                    icon: Icons.clean_hands,
+                                    value: _serviceQuality,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _serviceQuality = value;
+                                      });
+                                    },
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // سرعة التسليم
+                                  _buildRatingAspect(
+                                    title: 'سرعة التسليم',
+                                    subtitle: 'الالتزام بالمواعيد المحددة',
+                                    icon: Icons.speed,
+                                    value: _deliverySpeed,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _deliverySpeed = value;
+                                      });
+                                    },
+                                  ),
+
+                                  const SizedBox(height: 20),
+
+                                  // قيمة السعر
+                                  _buildRatingAspect(
+                                    title: 'قيمة السعر',
+                                    subtitle: 'مناسبة السعر مقابل الخدمة',
+                                    icon: Icons.monetization_on,
+                                    value: _priceValue,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _priceValue = value;
+                                      });
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
-                            child: const Text(
-                              'إلغاء',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                                fontWeight: FontWeight.w600,
+
+                            const SizedBox(height: 24),
+
+                            // حقل التعليق
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.comment,
+                                        color: primaryColor,
+                                        size: 24,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      const Text(
+                                        'تعليقك',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextField(
+                                    controller: _commentController,
+                                    maxLines: 4,
+                                    textAlign: TextAlign.right,
+                                    decoration: InputDecoration(
+                                      hintText: 'شاركنا المزيد من التفاصيل حول تجربتك (اختياري)',
+                                      hintStyle: const TextStyle(color: Colors.grey),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(color: Colors.grey[300]!),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: const BorderSide(color: primaryColor, width: 2),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        borderSide: BorderSide(color: Colors.grey[300]!),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      contentPadding: const EdgeInsets.all(16),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
+
+                            const SizedBox(height: 32),
+
+                            // أزرار العمل
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    style: OutlinedButton.styleFrom(
+                                      side: BorderSide(color: Colors.grey[400]!),
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'إلغاء',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  flex: 2,
+                                  child: ElevatedButton(
+                                    onPressed: _canSubmit ? _submitRating : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: _canSubmit ? primaryColor : Colors.grey,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 16),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      elevation: _canSubmit ? 3 : 0,
+                                    ),
+                                    child: const Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.send, size: 20),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'إرسال التقييم',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 32),
+                          ],
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _submitRating,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              elevation: 2,
-                            ),
-                            child: const Text(
-                              'إرسال التقييم',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRatingAspect({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required double value,
+    required Function(double) onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: value > 0 ? primaryColor.withOpacity(0.05) : Colors.grey[50],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: value > 0 ? primaryColor.withOpacity(0.3) : Colors.grey[300]!,
+          width: value > 0 ? 2 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: value > 0 ? primaryColor : Colors.grey[400],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (value > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    value.toStringAsFixed(1),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(5, (index) {
+              final starValue = index + 1.0;
+              return GestureDetector(
+                onTap: () => onChanged(starValue),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Icon(
+                    starValue <= value ? Icons.star : Icons.star_border,
+                    color: starValue <= value ? Colors.amber : Colors.grey[400],
+                    size: 36,
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
       ),
     );
   }

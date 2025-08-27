@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:melaq/services/review_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:melaq/components/api_extintion/url_api.dart';
 import 'package:melaq/components/widgets/professional_order_tracker.dart';
@@ -11,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
   final Map<String, String> order;
-  
+  // final int laundryId;
   const OrderDetailsScreen({super.key, required this.order});
 
   @override
@@ -47,6 +48,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     final orderStatus = widget.order['status'];
     if (orderStatus == 'courier_accepted' || orderStatus == 'courier_on_the_way') {
       final orderId = widget.order['id'];
+      
       final response = await http.get(Uri.parse('${APIConfig.salesagentorderEndpoint}$orderId/'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -65,6 +67,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   Future<void> fetchItems() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getString('userid');
+    print(widget.order);
     final orderId = widget.order['id'];
     final response = await http.get(Uri.parse('${APIConfig.orderitemget_order_itemsUrl}?order_id=$orderId&user_id=$userId'));
 
@@ -292,36 +295,55 @@ Future<void> editStatusOrder(String status_) async {
     );
   }
 
-  Widget _buildOrderStatus() {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        const  Text(
-            'تتبع حالة الطلب',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
+Widget _buildOrderStatus() {
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'تتبع حالة الطلب',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: primaryColor,
           ),
-          const SizedBox(height: 16),
-          // شريط التتبع الاحترافي الكامل
-          ProfessionalOrderTracker(
-            currentStatus: _convertToOrderStatus(widget.order['status']!),
-            estimatedTime: _getEstimatedTime(),
-            trackingNumber: widget.order['id'],
-            showProgressPercentage: true,
-            showTimeEstimate: true,
-            onStepTap: (status) {
-              _showStatusDetails(status);
-            },
+        ),
+        const SizedBox(height: 16),
+
+        // ✅ FutureBuilder للتحقق من حالة التقييم
+        FutureBuilder<bool>(
+          future: ReviewService.isOrderReviewed(
+            int.parse(widget.order['id']! ), // ضمان عدم حدوث null
           ),
-        ],
-      ),
-    );
-  }
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Text('خطأ: ${snapshot.error}');
+            } else {
+              final hasRated = snapshot.data ?? false;
+              return ProfessionalOrderTracker(
+                currentStatus: _convertToOrderStatus(widget.order['status'] ?? ''),
+                estimatedTime: _getEstimatedTime(),
+                trackingNumber: widget.order['id'] ?? '',
+                laundryId: int.tryParse(widget.order["laundryId"] ?? '0') ?? 0,
+                showProgressPercentage: true,
+                showTimeEstimate: true,
+                laundryName: widget.order['name'] ?? '',
+                hasRated: hasRated,
+                onStepTap: (status) {
+                  _showStatusDetails(status);
+                },
+              );
+            }
+          },
+        ),
+      ],
+    ),
+  );
+}
+
 
   /// تحويل حالة الطلب من النص إلى نوع OrderStatus
   OrderStatus _convertToOrderStatus(String status) {

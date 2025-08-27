@@ -1,4 +1,3 @@
-// Assuming LaundryReviewStats is currently structured to expect 'reviews' and 'statistics' keys
 import 'dart:convert';
 
 class LaundryReviewStats {
@@ -18,23 +17,21 @@ class LaundryReviewStats {
     required this.averagePriceValue,
   });
 
-  // Original fromJson (conceptual) that expects a map with 'reviews' and 'statistics'
-  /*
+  // Original fromJson that expects a map with 'reviews' and 'statistics'
   factory LaundryReviewStats.fromJson(Map<String, dynamic> json) {
     return LaundryReviewStats(
-      reviews: (json['reviews'] as List<dynamic>?)
-              ?.map((e) => LaundryReview.fromJson(e as Map<String, dynamic>))
-              .toList() ?? [],
       averageRating: json['statistics']['average_rating']?.toDouble() ?? 0.0,
       totalReviews: json['statistics']['total_reviews'] ?? 0,
       averageServiceQuality: json['statistics']['average_service_quality']?.toDouble() ?? 0.0,
       averageDeliverySpeed: json['statistics']['average_delivery_speed']?.toDouble() ?? 0.0,
       averagePriceValue: json['statistics']['average_price_value']?.toDouble() ?? 0.0,
+      reviews: (json['reviews'] as List<dynamic>?)
+              ?.map((e) => LaundryReview.fromJson(e as Map<String, dynamic>))
+              .toList() ?? [],
     );
   }
-  */
 
-  // *** Modified fromJson to handle a direct list of reviews and calculate stats ***
+  // Modified fromJson to handle a direct list of reviews and calculate stats
   factory LaundryReviewStats.fromListJson(List<dynamic> jsonList) {
     final List<LaundryReview> parsedReviews = jsonList
         .map((e) => LaundryReview.fromJson(e as Map<String, dynamic>))
@@ -57,6 +54,10 @@ class LaundryReviewStats {
     final double averageServiceQuality = totalReviews > 0 ? totalServiceQuality / totalReviews : 0.0;
     final double averageDeliverySpeed = totalReviews > 0 ? totalDeliverySpeed / totalReviews : 0.0;
     final double averagePriceValue = totalReviews > 0 ? totalPriceValue / totalReviews : 0.0;
+
+    // طباعة القيم للحلقة
+    print('Average Rating: $averageRating');
+    print('Total Reviews: $totalReviews');
 
     return LaundryReviewStats(
       reviews: parsedReviews,
@@ -97,9 +98,16 @@ class LaundryReview {
     required this.createdAt,
     required this.updatedAt,
   });
+static String maskName(String? name) {
+  if (name == null || name.isEmpty) return "مجهول";
 
+  // لو الاسم قصير جدًا ما نحتاج نقاط
+  if (name.length <= 2) return name;
+
+  int half = (name.length / 2).ceil();
+  return "${name.substring(0, half)}..." ;
+}
   factory LaundryReview.fromJson(Map<String, dynamic> json) {
-    // Calculate overall_rating if not directly provided, or use 'average_rating' from the individual review
     final double calculatedOverallRating = (json['service_quality']?.toDouble() ?? 0.0 +
                                            json['delivery_speed']?.toDouble() ?? 0.0 +
                                            json['price_value']?.toDouble() ?? 0.0) / 3.0;
@@ -108,13 +116,13 @@ class LaundryReview {
       id: json['id'],
       laundryId: json['laundry'],
       userId: json['user'],
-      userName:utf8.decode( json['user_name'].codeUnits) ?? 'مجهول',
-      rating: json['rating'] ?? 0, // Assuming 'rating' is the 'overall_rating' from API for the individual review
+      userName: maskName(utf8.decode(json['user_name'].codeUnits)),
+      rating: json['rating'] ?? 0,
       comment: utf8.decode(json['comment'].codeUnits) ?? '',
       serviceQuality: json['service_quality']?.toDouble() ?? 0.0,
       deliverySpeed: json['delivery_speed']?.toDouble() ?? 0.0,
       priceValue: json['price_value']?.toDouble() ?? 0.0,
-      overallRating: json['average_rating']?.toDouble() ?? calculatedOverallRating, // Use API's average_rating if present, else calculate
+      overallRating: calculatedOverallRating, // استخدم الحساب هنا
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: DateTime.parse(json['updated_at']),
     );

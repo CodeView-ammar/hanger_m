@@ -95,13 +95,13 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
     }
 
     // تحديد السعر حسب نوع الخدمة
-    final basePrice = _serviceType == 'مستعجلة' 
+    final basePrice = _serviceType == 'مستعجل' 
         ? widget.serveiceUrgentPrice 
         : widget.servicePrice;
 
     final totalSubServicePrice = _selectedSubServices.fold(0.0, (sum, item) => sum + item.price);
     final selectedPrice = totalSubServicePrice + (basePrice * _quantity);
-    final tServicetype = _serviceType == 'مستعجلة' ? 'urgent' : 'normal';
+    final tServicetype = _serviceType == 'مستعجل' ? 'urgent' : 'normal';
 
     try {
       final response = await http.post(
@@ -140,7 +140,7 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
   @override
   Widget build(BuildContext context) {
     // تحديد السعر الأساسي بناءً على نوع الخدمة
-    final basePrice = _serviceType == 'مستعجلة' 
+    final basePrice = _serviceType == 'مستعجل' 
         ? widget.serveiceUrgentPrice 
         : widget.servicePrice;
 
@@ -193,11 +193,11 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   UnitPrice(price: totalPrice),
-                                  if (_serviceType == 'مستعجلة')
+                                  if (_serviceType == 'مستعجل')
                                     Padding(
                                       padding: const EdgeInsets.only(top: 4),
                                       child: Text(
-                                        '(+${(widget.serveiceUrgentPrice - widget.servicePrice).toStringAsFixed(1)} للخدمة المستعجلة)',
+                                        '(+${(widget.serveiceUrgentPrice - widget.servicePrice).toStringAsFixed(1)} للخدمة المستعجل)',
                                         style: const TextStyle(
                                           color: Colors.red,
                                           fontSize: 12,
@@ -236,9 +236,9 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
                             _buildServiceTypeTile(
                               title: AppLocalizations.of(context)!.urgent,
                               price: widget.serveiceUrgentPrice,
-                              isSelected: _serviceType == 'مستعجلة',
+                              isSelected: _serviceType == 'مستعجل',
                               onTap: () => setState(() {
-                                _serviceType = 'مستعجلة';
+                                _serviceType = 'مستعجل';
                                 _selectedSubServices.clear();
                               }),
                             ),
@@ -281,13 +281,29 @@ class _ProductBuyNowScreenState extends State<ProductBuyNowScreen> {
         children: [
           Text(title),
           const SizedBox(width: 8),
-          Text(
-            '${price.toStringAsFixed(1)} ر.س',
-            style: TextStyle(
-              color: isSelected ? primaryColor : Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
+          RichText(
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: '${price.toStringAsFixed(1)} ',
+              style: TextStyle(
+                color: isSelected ? primaryColor : Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+                fontSize: 16,
+              ),
             ),
-          ),
+            WidgetSpan(
+              child: Image.asset(
+                'assets/icons/riyal.png', // ضع مسار الصورة الصحيح
+                width: 16,  // حجم الأيقونة
+                height: 16,
+                color: isSelected ? primaryColor : Colors.grey.shade600, // إذا الصورة بالأبيض والأسود يمكن تغيير اللون
+              ),
+            ),
+          ],
+        ),
+      )
+
         ],
       ),
       leading: Transform.scale(

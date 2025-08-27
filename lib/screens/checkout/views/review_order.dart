@@ -11,7 +11,7 @@ import 'package:melaq/route/route_constants.dart';
 import 'package:melaq/screens/checkout/views/cart_screen.dart';
 import 'package:melaq/screens/checkout/views/delegate_note.dart';
 import 'package:melaq/screens/checkout/views/payment_method.dart';
-import 'package:melaq/screens/checkout/views/delivery_method_screen.dart';
+
 
 class ReviewOrderScreen extends StatefulWidget {
   final int laundryId;
@@ -373,49 +373,40 @@ void _initializePaymentMethod() {
     }
     return 0.0;
   }
-
-  Widget _buildSummaryRow(String label, String value, IconData icon, Color iconColor) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: iconColor, size: 20),
+Widget _buildSummaryRow(String label, Widget valueWidget, IconData icon, Color iconColor) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey[50],
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey[200]!),
+    ),
+    child: Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
-              ),
-            ),
-          ),
-          Text(
-            value,
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
+        ),
+        valueWidget, // استخدم Widget بدل Text
+      ],
+    ),
+  );
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -659,63 +650,113 @@ void _initializePaymentMethod() {
                     const SizedBox(height: 20),
                     
                     // Order Amount
-                    _buildSummaryRow(
-                      "إجمالي المنتجات",
-                      "${widget.total.toStringAsFixed(2)} ر.س",
-                      Icons.shopping_bag_outlined,
-                      Colors.blue[600]!,
+                 _buildSummaryRow(
+                "إجمالي المنتجات",
+                RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
                     ),
-                    const SizedBox(height: 12),
-                    
+                    children: [
+                      TextSpan(text: "${widget.total.toStringAsFixed(2)} "),
+                      WidgetSpan(
+                        child: Image.asset(
+                          'assets/icons/riyal.png',
+                          width: 16,
+                          height: 16,
+                            // alignment: PlaceholderAlignment.,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icons.shopping_bag_outlined,
+                Colors.blue[600]!,
+              ),
+   const SizedBox(height: 12),
+
                     // Delivery Cost
                     _buildSummaryRow(
                       "رسوم التوصيل (${widget.distance.toStringAsFixed(1)} كم)",
-                      "${deliveryPrice.toStringAsFixed(2)} ر.س",
+                      RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          children: [
+                            TextSpan(text: "${deliveryPrice.toStringAsFixed(2)} "),
+                            WidgetSpan(
+                              child: Image.asset(
+                                'assets/icons/riyal.png',
+                                width: 16,
+                                height: 16,
+                                // alignment: PlaceholderAlignment.middle,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       Icons.delivery_dining,
                       Colors.orange[600]!,
                     ),
-                    
+
                     const SizedBox(height: 16),
                     Divider(color: Colors.grey[300], thickness: 1),
                     const SizedBox(height: 16),
                     
-                    // Total Amount
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.green[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.green[200]!),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.account_balance_wallet, color: Colors.green[700], size: 24),
-                              const SizedBox(width: 12),
-                              Text(
-                                "المبلغ الإجمالي",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green[800],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            "${totalAmount.toStringAsFixed(2)} ر.س",
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green[700],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                 // Total Amount
+Container(
+  padding: const EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: Colors.green[50],
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: Colors.green[200]!),
+  ),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Row(
+        children: [
+          Icon(Icons.account_balance_wallet, color: Colors.green[700], size: 24),
+          const SizedBox(width: 12),
+          Text(
+            "المبلغ الإجمالي",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.green[800],
+            ),
+          ),
+        ],
+      ),
+      RichText(
+        text: TextSpan(
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.green[700],
+          ),
+          children: [
+            TextSpan(text: "${totalAmount.toStringAsFixed(2)} "),
+            WidgetSpan(
+              child: Image.asset(
+                'assets/icons/riyal.png', // ضع مسار صورة العملة الصحيح
+                width: 20,
+                height: 20,
+                // alignment: PlaceholderAlignment.middle,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+),
+ ],
                 ),
               ),
               const SizedBox(height: 20),

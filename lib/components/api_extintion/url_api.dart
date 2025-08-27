@@ -40,10 +40,10 @@ class APIConfig {
   static String get addTransactionEndpoint => '$api_baseUrl/transactions/';
   
   // Support System APIs
-  static String get supportTicketsEndpoint => '$api_baseUrl/support/tickets/';
-  static String get supportMessagesEndpoint => '$api_baseUrl/support/messages/';
-  static String get supportFAQEndpoint => '$api_baseUrl/support/faq/';
-  static String get supportStatisticsEndpoint => '$api_baseUrl/support/statistics/';
+  static String get supportTicketsEndpoint => '$api_baseUrl/tickets/';
+  static String get supportMessagesEndpoint => '$api_baseUrl/messages/';
+  static String get supportFAQEndpoint => '$api_baseUrl/faq/';
+  static String get supportStatisticsEndpoint => '$api_baseUrl/statistics/';
   static String get supportChatEndpoint => '$api_baseUrl/support-chat/';
   
   // Reviews APIs

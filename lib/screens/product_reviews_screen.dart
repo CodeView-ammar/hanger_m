@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:geideapay/models/order.dart';
 import 'package:melaq/constants.dart';
+import 'package:melaq/screens/order/views/orders_screen.dart';
 import '../services/review_service.dart';
 import '../components/custom_messages.dart';
 import '../models/review_model.dart';
@@ -7,11 +9,13 @@ import '../models/review_model.dart';
 class ProductReviewsScreen extends StatefulWidget {
   final int laundryId;
   final String laundryName;
+  final int orderId;
 
   const ProductReviewsScreen({
     Key? key,
     required this.laundryId,
     required this.laundryName,
+    required this.orderId,
   }) : super(key: key);
 
   @override
@@ -61,6 +65,7 @@ class _ProductReviewsScreenState extends State<ProductReviewsScreen> {
       
       await ReviewService.addLaundryReview(
         laundryId: widget.laundryId,
+        withOrderId: int.parse(widget.orderId.toString() ),
         serviceQuality: serviceQuality,
         deliverySpeed: deliverySpeed,
         priceValue: priceValue,

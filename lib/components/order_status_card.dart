@@ -92,6 +92,7 @@ class OrderStatusCard extends StatelessWidget {
                   child: EnhancedOrderProgress(
                     orderStatus: orderStatus,
                     processingStatus: processingStatus,
+                  
                     packedStatus: packedStatus,
                     shippedStatus: shippedStatus,
                     deliveredStatus: deliveredStatus,

@@ -6,9 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:melaq/constants.dart';
 import 'package:melaq/l10n/app_localizations.dart';
 import 'package:melaq/screens/checkout/views/review_order.dart';
-import 'package:melaq/screens/home/views/components/best_sellers.dart';
-import 'package:melaq/screens/product/views/product_details_screen.dart';
-
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
 
@@ -262,7 +259,31 @@ double distance = 0.0; // متغير للمسافة
                           child: ListTile(
                             textColor: Colors.white,
                             title: Text(utf8.decode(item['service_name'].codeUnits)),
-                            subtitle: Text("${AppLocalizations.of(context)!.price}: \ ${AppLocalizations.of(context)!.sar} ${item['price']} × ${item['quantity']}"),
+                            subtitle: RichText(
+                                text: TextSpan(
+                                  style: Theme.of(context).textTheme.titleMedium, // استخدام ستايل الـ subtitle الافتراضي
+                                  children: [
+                                    TextSpan(
+                                      style: const TextStyle(color: Colors.white),
+                                      text: "${AppLocalizations.of(context)!.price}: \ ", // النص قبل السعر
+                                    ),
+                                    WidgetSpan(
+                                      child: Image.asset(
+                                        'assets/icons/riyal.png', // ضع مسار الصورة الصحيح
+                                        width: 16,
+                                        height: 16,
+                                        color: Colors.white,
+                                      ),
+                                      alignment: PlaceholderAlignment.middle, // لمحاذاة الصورة مع النص عمودياً
+                                    ),
+                                    TextSpan(
+                                      style: const TextStyle(color: Colors.white),
+                                      text: " ${item['price']} × ${item['quantity']}", // باقي النص بعد أيقونة العملة
+                                    ),
+                                  ],
+                                ),
+                              ),
+
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -288,10 +309,28 @@ double distance = 0.0; // متغير للمسافة
                     ),
             ),
             const SizedBox(height: 16.0),
-            Text(
-              "${AppLocalizations.of(context)!.total}: \ ${AppLocalizations.of(context)!.sar} ${totalPrice.toStringAsFixed(2)}",
-              style: Theme.of(context).textTheme.titleLarge,
+            RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.titleLarge, // استخدام ستايل الـ titleLarge
+                children: [
+                  TextSpan(
+                    text: "${AppLocalizations.of(context)!.total}: \ ", // النص قبل السعر
+                  ),
+                  WidgetSpan(
+                    child: Image.asset(
+                      'assets/icons/riyal.png', // ضع مسار الصورة الصحيح
+                      width: 20,  // يمكن تعديل الحجم ليتناسب مع النص
+                      height: 20,
+                    ),
+                    alignment: PlaceholderAlignment.middle, // لمحاذاة الصورة مع النص عمودياً
+                  ),
+                  TextSpan(
+                    text: " ${totalPrice.toStringAsFixed(2)}", // السعر بعد أيقونة العملة
+                  ),
+                ],
+              ),
             ),
+
             const SizedBox(height: 16.0),
             ElevatedButton(
                   style: ElevatedButton.styleFrom(

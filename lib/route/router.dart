@@ -100,10 +100,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
             settings: settings,
             builder: (context) => const SupportChatScreen(),
           );
-    case passwordRecoveryScreenRoute:
-      return MaterialPageRoute(
-        builder: (context) => const PasswordRecoveryScreen(),
-      );
+
     // case verificationMethodScreenRoute:
     //   return MaterialPageRoute(
     //     builder: (context) => const VerificationMethodScreen(),
@@ -175,7 +172,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
   );
 case productReviewsScreenRoute:
       return MaterialPageRoute(
-        builder: (context) => const ProductReviewsScreen(laundryId: 1,laundryName: '',),
+        builder: (context) => const ProductReviewsScreen(laundryId: 1,laundryName: '',orderId: 0,),
       );
     // case addReviewsScreenRoute:
     //   return MaterialPageRoute(
@@ -201,10 +198,7 @@ case productReviewsScreenRoute:
       return MaterialPageRoute(
         builder: (context) => const OrderScreen(),
       );
-    case onSaleScreenRoute:
-      return MaterialPageRoute(
-        builder: (context) => const OnSaleScreen(),
-      );
+
 
     case SplashScreenRoute:
       return MaterialPageRoute(

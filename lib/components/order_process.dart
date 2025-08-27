@@ -399,8 +399,15 @@ class _EnhancedOrderProgressState extends State<EnhancedOrderProgress> with Sing
                       ),
                     ),
                     const SizedBox(height: 4),
+                    const Text(
+                      'مغسلة',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
                     Text(
-                      widget.laundryName ?? 'مغسلة الجودة',
+                      widget.laundryName ?? '',
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,

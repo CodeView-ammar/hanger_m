@@ -354,7 +354,7 @@ class _HelpScreenState extends State<HelpScreen> {
                         Icon(Icons.phone, color: primaryColor, size: 20),
                         const SizedBox(width: 8),
                         const Text(
-                          "+966 54 124 2726",
+                          "+966541242726",
                           style: TextStyle(fontWeight: FontWeight.w500),
                         ),
                       ],
@@ -431,7 +431,7 @@ class _HelpScreenState extends State<HelpScreen> {
       if (userId.isEmpty) {
         throw Exception('يرجى تسجيل الدخول أولاً');
       }
-
+      print(APIConfig.supportTicketsEndpoint);
       // إنشاء تذكرة دعم فني جديدة
       final response = await http.post(
         Uri.parse(APIConfig.supportTicketsEndpoint),
@@ -449,11 +449,11 @@ class _HelpScreenState extends State<HelpScreen> {
         // تم إنشاء التذكرة بنجاح
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content:const Row(
               children: [
-                const Icon(Icons.check_circle, color: Colors.white),
-                const SizedBox(width: 8),
-                const Expanded(
+                 Icon(Icons.check_circle, color: Colors.white),
+                 SizedBox(width: 8),
+                 Expanded(
                   child: Text('تم إنشاء تذكرة دعم فني بنجاح'),
                 ),
               ],

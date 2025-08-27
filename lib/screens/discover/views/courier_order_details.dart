@@ -51,7 +51,7 @@ Future<void> fetchDefaultPaymentMethod() async {
     );
 
     if (response.statusCode == 200) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+      // final Map<String, dynamic> responseData = json.decode(response.body);
       setState(() {
 
         // تحويل طريقة الدفع إلى القيمة التي سيقبلها الـ API
