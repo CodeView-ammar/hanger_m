@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -13,37 +15,44 @@ class AppLocalizationsAr extends AppLocalizations {
   String get welcomeapp => 'مرحبا بك في تطبيق معلاق';
 
   @override
-  String get welcomeapp_detils => 'تستطيع من خلال الطبيق حجز وتوصيل الملابس من المغاسل وإلى المنزل';
+  String get welcomeapp_detils =>
+      'تستطيع من خلال الطبيق حجز وتوصيل الملابس من المغاسل وإلى المنزل';
 
   @override
   String get search_laundries => 'ابحث عن المغاسل التي بالقرب منك';
 
   @override
-  String get find_laundries_nearby => 'هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك';
+  String get find_laundries_nearby =>
+      'هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك';
 
   @override
-  String get choose_laundry_and_clothes => 'قم بإختيار المغسلة وإختيار انواع الثياب التي تريد ان تغسلها وضعها في السلة';
+  String get choose_laundry_and_clothes =>
+      'قم بإختيار المغسلة وإختيار انواع الثياب التي تريد ان تغسلها وضعها في السلة';
 
   @override
-  String get choose_and_deliver => 'قم بإختيار المغسلة وإختيار انواع الثياب التي تريد ان تغسلها وضعها في السلة وسيتم الوصول إلا موقعك من قبل الدلفري الخاص بنا وتوصيلها للمغسلة المراد ';
+  String get choose_and_deliver =>
+      'قم بإختيار المغسلة وإختيار انواع الثياب التي تريد ان تغسلها وضعها في السلة وسيتم الوصول إلا موقعك من قبل الدلفري الخاص بنا وتوصيلها للمغسلة المراد ';
 
   @override
   String get quick_and_safe_payment => 'دفع \nسريع وآمن';
 
   @override
-  String get multiple_payment_options => 'هناك العديد من خيارات الدفع المتاحة لراحتك.';
+  String get multiple_payment_options =>
+      'هناك العديد من خيارات الدفع المتاحة لراحتك.';
 
   @override
   String get track_order => 'تتبع الطلب';
 
   @override
-  String get manage_shipments => 'على وجه الخصوص، يمكن لـ معلاق تعبئة طلباتك، ومساعدتك في إدارة شحناتك بسلاسة.';
+  String get manage_shipments =>
+      'على وجه الخصوص، يمكن لـ معلاق تعبئة طلباتك، ومساعدتك في إدارة شحناتك بسلاسة.';
 
   @override
   String get nearby_laundries => 'المغاسل القريبة';
 
   @override
-  String get browse_and_get_info => 'يمكنك بسهولة تتبع مغاسل وتصفح العناصر الخاصة بهم والحصول على معلومات حول خدماتهم.';
+  String get browse_and_get_info =>
+      'يمكنك بسهولة تتبع مغاسل وتصفح العناصر الخاصة بهم والحصول على معلومات حول خدماتهم.';
 
   @override
   String get title_app => 'معلاق لخدمات المغاسل';
@@ -52,7 +61,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchLaundriesText => 'ابحث عن المغاسل \n التي بالقرب منك';
 
   @override
-  String get findLaundriesNearbyDescription => 'هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك.';
+  String get findLaundriesNearbyDescription =>
+      'هنا ستجد جميع المغاسل مع التصنيفات الخاصة بها ومعرفة المغسلة الاقرب منك.';
 
   @override
   String get home => 'الرئيسية';
@@ -175,7 +185,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get poloic => 'الدفع الإلكتروني لاحقا او نقدأ';
 
   @override
-  String get piaopettaotrrto => 'ادفع نقدا او ادفع إلكترونيا من خلال التطبيق بمجرد ان يستلم المندوب الطلب';
+  String get piaopettaotrrto =>
+      'ادفع نقدا او ادفع إلكترونيا من خلال التطبيق بمجرد ان يستلم المندوب الطلب';
 
   @override
   String get ptaspumn => 'ادفع لجهة معينة باستخدام رقم الجوال';
