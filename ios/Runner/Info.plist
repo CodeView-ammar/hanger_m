@@ -28,7 +28,14 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
 	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>نحتاج الوصول إلى مكتبة الصور الخاصة بك</string>
 	<key>NSCameraUsageDescription</key>
@@ -41,28 +48,30 @@
 	<string>We need your location to provide better service.</string>
 	<key>NSUserTrackingUsageDescription</key>
 	<string>We need your permission to send notifications.</string>
+
+	<!-- ✅ إضافة Face ID -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>نحتاج استخدام Face ID لتسجيل الدخول بشكل آمن وسريع</string>
+
 	<key>UIBackgroundModes</key>
 	<array>
-	<string>fetch</string>
-	<string>remote-notification</string>
+		<string>fetch</string>
+		<string>remote-notification</string>
 	</array>
+
 	<key>NSAppTransportSecurity</key>
 	<dict>
-	<key>NSAllowsArbitraryLoads</key>
-	<true/>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
 	</dict>
 
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
 	<key>CFBundleLocalizations</key>
 	<array>
-	<string>ar</string>
-	<string>en</string>
-	<string>es</string>
+		<string>ar</string>
+		<string>en</string>
+		<string>es</string>
 	</array>
+
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -70,6 +79,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
